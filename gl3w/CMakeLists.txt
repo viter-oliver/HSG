@@ -1,0 +1,1 @@
+add_library(gl3w GL/gl3w.c)
