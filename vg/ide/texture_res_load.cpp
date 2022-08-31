@@ -36,11 +36,11 @@ void texture_res_load::load_res_from_json(Value& jroot)
 	}
 }
 
-extern string g_cureent_directory;
+extern string g_current_directory;
 
 bool load_texture_info(packing_texture& rtlist, string& str_txt_pack_file, string& str_txt_data_file)
 {
-	string str_texture_pack_file = g_cureent_directory+text_res_fold;
+	string str_texture_pack_file = g_current_directory+text_res_fold;
 	string str_texture_data_file = str_texture_pack_file;
 		
 	str_texture_pack_file += str_txt_pack_file;

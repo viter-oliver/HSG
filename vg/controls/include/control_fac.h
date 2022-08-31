@@ -5,9 +5,11 @@ using control_base=vg::control_def_ide;
 #include "control_def.h"
 using control_base=vg::control_def;
 #endif
-#include "fab.h"
+#include <fab/fab.h>
 namespace vg{
+using sd_control_base=std::shared_ptr<control_base>;
 using control_fac=fab::Factory<control_base>;
+
 struct control_factory {
     template<typename T, typename ... Args >
     struct control_fac_assist {
@@ -23,6 +25,9 @@ struct control_factory {
         return instance_;
     }
 };
+inline sd_control_base produce_control(std::string cname){
+    return std::move(control_factory::instance().Create(cname));
+}
 #define REG_CTL_2_FAC(T) static control_factory::control_fac_assist<T> reg_##T(#T)
-#define REG_CTL_2_FAC(T,...) static control_factory::control_fac_assist<T,__VA_ARGS__> reg_##T(#T)
+#define REG_CTL_2_FAC_ARGS(T,...) static control_factory::control_fac_assist<T,__VA_ARGS__> reg_##T(#T)
 }

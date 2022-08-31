@@ -22,6 +22,7 @@ namespace vg
 			auto nml=vnm.norm();
 			return nml<_pt._radius;
 		}
+		DECLARE_EX_INT
 	};
 	REG_CTL_2_FAC(circle);
 }

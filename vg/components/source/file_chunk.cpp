@@ -11,5 +11,4 @@ void file_chunk_unit::re_alloc(u32 fsize) {
   }
 }
 file_chunk_unit::~file_chunk_unit() { free(_pbin); }
-mp_file_chunk _mp_file_chunk;
 } // namespace vg

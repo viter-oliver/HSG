@@ -470,7 +470,7 @@ void state_manager_edit::view_state_manager_item_property()
 		for (idx = EaseLinear; idx < EaseFuncsCount; idx++)
 		{
 			auto itxt = g_mtxt_intl.find(easing_func_name[idx]);
-			auto& txt_unit = itxt->second;
+			auto& txt_unit = *itxt->second;
 			ImVec2 uv0 = ImVec2(txt_unit._x0 / g_txt_width_intl, txt_unit._y0 / g_txt_height_intl);
 			ImVec2 uv1 = ImVec2((txt_unit._x1) / g_txt_width_intl, (txt_unit._y1) / g_txt_height_intl);
 			ImVec2 img_sz(88, 81);

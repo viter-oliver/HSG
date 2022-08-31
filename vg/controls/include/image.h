@@ -6,7 +6,7 @@ class AFG_EXPORT image : public control_base {
   DEF_STRUCT_WITH_INIT(intl_pt, _img_pt, 
                        (vec2, _rotate_center),
                        (vec2, _offset_scale_srd),
-                       (vi2,  _texture_index_txt),
+                       (vui2,  _texture_index_txt),
                        (vec4, _tint_clr),
                        (vec4, _border_clr),
                        (float,_angle_srd, {0.f}))
@@ -21,7 +21,7 @@ public:
     auto st_pt=ab_base_pos-offset;
     return st_pt;
   }
-  vi2 get_texture_id() { return _img_pt._texture_index_txt; }
+  vui2 get_texture_id() { return _img_pt._texture_index_txt; }
   void rotate(float angle) { 
     _img_pt._angle_srd = angle; 
   }

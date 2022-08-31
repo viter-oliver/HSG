@@ -18,6 +18,7 @@ namespace vg
 	public:
 		material_2d();
 		~material_2d(){}
+		DECLARE_EX_INT
 		void link();
 		void draw();
 	};

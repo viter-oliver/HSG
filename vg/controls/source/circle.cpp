@@ -10,12 +10,7 @@ namespace vg
 	circle::circle()
 	{
 		_pt._bkclr = { 1., 1., 0., 1. };
-		#if defined(WITHIN_IDE)
-		reg_property_handle(&_pt, 2, [this](void* memb_adress)
-		{
-			ImGui::SliderInt("Number of segments",&_pt._numb_segs,3,60);
-		});
-		#endif
+
 	}
 	void circle::draw()
 	{

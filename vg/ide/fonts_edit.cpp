@@ -83,8 +83,8 @@ void fonts_edit::draw_fonts_list()
 				ft_u->_char_count_r = ch_rows;
 				string ttf_file_path = ttf_file.substr(0, ttf_file.find_last_of('\\') + 1);
 			
-				extern string g_cureent_directory;
-				string str_ttf_path = g_cureent_directory+font_fold;
+				extern string g_current_directory;
+				string str_ttf_path = g_current_directory+font_fold;
 				if (ttf_file_path != str_ttf_path)
 				{
 					string str_cmd = "copy ";

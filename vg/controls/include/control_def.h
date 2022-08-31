@@ -10,12 +10,13 @@ namespace vg {
 struct property_mem_range {
   void *phead_adree;
   int mem_len;
+  property_mem_range(void* phead, int len) :phead_adree(phead), mem_len(len) {}
 };
 using v_property_mem_range = std::vector<property_mem_range>;
 const int name_len = 50;
 class control_def;
 using sd_control_def = std::shared_ptr<control_def>;
-using v_sd_control_def = std::vector<v_sd_control_def>;
+using v_sd_control_def = std::vector<sd_control_def>;
 class AFG_EXPORT control_def {
 protected:
   vp_prop_ele _vprop_eles;
@@ -48,15 +49,16 @@ public:
   }
   virtual void ex_init_fun() {}
   control_def() { ex_init_fun(); }
-  #ifdef WITHIN_IDE
-  #define EX_INIT virtual void ex_init_fun();
-  #else
-  #define EX_INIT 
-  #endif
+
+  #define DECLARE_EX_INT
+  #define DECLARE_PROVIDE_DRAGGING_VALUE
+  #define DECLARE_DRAW_OUTLINE
+  #define DECLARE_DRAW_SEL_ANCHOR
+
   virtual ~control_def() {}
   void collect_property_range(v_property_mem_range &vplist) {
     for (auto &prop_ele : _vprop_eles) {
-      vplist.emplace_back(prop_ele->_pro_address, prop_ele->_pro_sz);
+        vplist.emplace_back( prop_ele->_pro_address, prop_ele->_pro_sz );
     }
   }
   /*control_def *get_copy_of_object(){
@@ -64,8 +66,8 @@ public:
   }*/
   std::function<void(void)> _before_draw_handle = nullptr;
   std::function<void(void)> _after_draw_handle = nullptr;
-  virtual void draw() {
-    if (!visiblity()) {
+  void draw_frames(){
+    if (!visibility()) {
       return;
     }
     if (_before_draw_handle) {
@@ -79,15 +81,17 @@ public:
     if (_after_draw_handle) {
       _after_draw_handle();
     }
-  }
+  }  
+  virtual void draw() {}
+  virtual void draw_outline(){}
   vec2 &base_pos() { return _in_p._pos; }
   vec2 &size() { return _in_p._size; }
-  bool &visiblity() { return _in_p._visible; }
+  bool &visibility() { return _in_p._visible; }
   auto get_parent() { return _parent; }
   bool be_seen() {
     control_def *pparnt = this;
     do {
-      if (!pparnt->visiblity()) {
+      if (!pparnt->visibility()) {
         return false;
       }
     } while (pparnt = pparnt->get_parent());
@@ -139,7 +143,7 @@ public:
   }
   sd_control_def get_child(int index) { return _vchilds[index]; }
   std::string try_create_a_child_name(std::string attempt_name,
-                                      control_def *pcur = NULL) {
+                                      sd_control_def pcur = nullptr) {
     for (auto &ichd : _vchilds) {
       if (ichd != pcur && ichd->name() == attempt_name) {
         attempt_name += '_';
@@ -180,19 +184,33 @@ public:
       return nullptr;
     }
   }
-  void set_prop_fd_value(int pg_id, int fd_id, void *pvalue, int value_sz) {
-    assert(pvalue && "invalid pvalue");
+  bool set_prop_fd_value(int pg_id, int fd_id, void *pvalue, u32 value_sz=-1) {
+    if (!pvalue){
+        vg_print("pvalue is 0");
+        return false;
+    }
     auto pg_sz = _vprop_eles.size();
-    assert(pg_id < pg_sz && "invalid pg_id");
+
+    if (pg_id >= pg_sz) {
+        vg_print("page id:% is ivalid", pg_id);
+        return false;
+    } 
+
     auto &pg_ele = _vprop_eles[pg_id];
     auto &vfd_ele = pg_ele->_pro_page;
     auto vfd_ele_sz = vfd_ele.size();
     assert(fd_id < vfd_ele_sz && "invalid fd_id");
+    if (fd_id >= vfd_ele_sz) {
+        vg_print("field id:%d is invalid", fd_id);
+        return false;
+    }
     auto &fd_ele = *vfd_ele[fd_id];
     char *pdest = fd_ele._address;
     auto wsize = fd_ele._count * fd_ele._tpsz;
-    assert(value_sz<=wsize);
-    memcpy(pdest, pvalue, value_sz);
+    auto cp_sz = value_sz > wsize ? wsize : value_sz;
+
+    memcpy(pdest, pvalue, cp_sz);
+    return true;
   }
 };
 } // namespace vg

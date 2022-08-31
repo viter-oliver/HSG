@@ -1,19 +1,7 @@
 #include "user_control_imgui.h"
 #include "res_internal.h"
-
+namespace vg{
 //#include <functional>
-bool IconTreeNode(const char *icon_name, const char *label,
-                  ImGuiTreeNodeFlags flags, const char *postfix_icon) {
-  ImGuiContext &g = *GImGui;
-  ImGuiWindow *window = g.CurrentWindow;
-
-  if (window->SkipItems)
-    return false;
-
-  return IconTreeNodeBehavior(window->GetID(label), flags, icon_name, label,
-                              postfix_icon);
-}
-
 bool IconTreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags,
                           const char *icon_name, const char *label,
                           const char *postfix_icon) {
@@ -165,23 +153,23 @@ bool IconTreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags,
           _icon_postfix(icon_postfix), will_draw(false) {
       float w = 18.0f;
       float h = 18.0f;
-      auto itxt_unit = g_mtxt_intl.find(_iconname);
-      if (itxt_unit != g_mtxt_intl.end()) {
+      auto itxt_unit = internal::g_mtxt_intl.find(_iconname);
+      if (itxt_unit != internal::g_mtxt_intl.end()) {
         will_draw = true;
-        auto &txt_unit = itxt_unit->second;
+        auto &txt_unit = *itxt_unit->second;
         pos1 = _basepos;
         pos2 = {pos1.x, pos1.y + h};
         pos3 = {pos1.x + w, pos2.y};
         pos4 = {pos3.x, pos1.y};
 
-        uv1 = ImVec2(txt_unit._x0 / g_txt_width_intl,
-                     txt_unit._y0 / g_txt_height_intl);
-        uv2 = ImVec2(txt_unit._x0 / g_txt_width_intl,
-                     (txt_unit._y1) / g_txt_height_intl);
-        uv3 = ImVec2((txt_unit._x1) / g_txt_width_intl,
-                     (txt_unit._y1) / g_txt_height_intl);
-        uv4 = ImVec2((txt_unit._x1) / g_txt_width_intl,
-                     (txt_unit._y0) / g_txt_height_intl);
+        uv1 = ImVec2(txt_unit._x0 / internal::g_txt_width_intl,
+                     txt_unit._y0 / internal::g_txt_height_intl);
+        uv2 = ImVec2(txt_unit._x0 / internal::g_txt_width_intl,
+                     (txt_unit._y1) / internal::g_txt_height_intl);
+        uv3 = ImVec2((txt_unit._x1) / internal::g_txt_width_intl,
+                     (txt_unit._y1) / internal::g_txt_height_intl);
+        uv4 = ImVec2((txt_unit._x1) / internal::g_txt_width_intl,
+                     (txt_unit._y0) / internal::g_txt_height_intl);
         _txtxoffset += w;
       }
       if (icon_postfix) {
@@ -190,13 +178,13 @@ bool IconTreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags,
     }
     void operator()() {
       if (will_draw) {
-        ImGui::ImageQuad((ImTextureID)g_txt_id_intl, pos1, pos2, pos3, pos4,
+        ImGui::ImageQuad((ImTextureID)internal::g_txt_id_intl, pos1, pos2, pos3, pos4,
                          uv1, uv2, uv3, uv4);
       }
       if (_icon_postfix) {
-        auto itxt_unit = g_mtxt_intl.find(_icon_postfix);
-        if (itxt_unit != g_mtxt_intl.end()) {
-          auto &txt_unit = itxt_unit->second;
+        auto itxt_unit = internal::g_mtxt_intl.find(_icon_postfix);
+        if (itxt_unit != internal::g_mtxt_intl.end()) {
+          auto &txt_unit = *itxt_unit->second;
           float w = 18.0f;
           float h = 18.0f;
           pos1 = _basepos;
@@ -207,15 +195,15 @@ bool IconTreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags,
           pos3 = {pos1.x + w, pos2.y};
           pos4 = {pos3.x, pos1.y};
 
-          uv1 = ImVec2(txt_unit._x0 / g_txt_width_intl,
-                       txt_unit._y0 / g_txt_height_intl);
-          uv2 = ImVec2(txt_unit._x0 / g_txt_width_intl,
-                       (txt_unit._y1) / g_txt_height_intl);
-          uv3 = ImVec2((txt_unit._x1) / g_txt_width_intl,
-                       (txt_unit._y1) / g_txt_height_intl);
-          uv4 = ImVec2((txt_unit._x1) / g_txt_width_intl,
-                       (txt_unit._y0) / g_txt_height_intl);
-          ImGui::ImageQuad((ImTextureID)g_txt_id_intl, pos1, pos2, pos3, pos4,
+          uv1 = ImVec2(txt_unit._x0 / internal::g_txt_width_intl,
+                       txt_unit._y0 / internal::g_txt_height_intl);
+          uv2 = ImVec2(txt_unit._x0 / internal::g_txt_width_intl,
+                       (txt_unit._y1) / internal::g_txt_height_intl);
+          uv3 = ImVec2((txt_unit._x1) / internal::g_txt_width_intl,
+                       (txt_unit._y1) / internal::g_txt_height_intl);
+          uv4 = ImVec2((txt_unit._x1) / internal::g_txt_width_intl,
+                       (txt_unit._y0) / internal::g_txt_height_intl);
+          ImGui::ImageQuad((ImTextureID)internal::g_txt_id_intl, pos1, pos2, pos3, pos4,
                            uv1, uv2, uv3, uv4);
         }
       }
@@ -265,21 +253,41 @@ bool IconTreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags,
   return is_open;
 }
 
-bool IconButton(const char* icon_name,ImVec2& img_size,int flags,int frame_padding,const ImVec4& bg_col,const ImVec4& tint_col){
-	auto itxt=g_mtxt_intl.find(icon_name);
-	if(itxt==g_mtxt_intl.end()){
-		assert(false&&icon_name&&"is invalid icon name!");
-		return false;
-	}
-	auto& txt_unit=itxt->second;
-	ImVec2 uv0 = ImVec2(txt_unit._x0 / g_txt_width_intl, txt_unit._y0 / g_txt_height_intl);
-	ImVec2 uv1 = ImVec2((txt_unit._x1) / g_txt_width_intl, (txt_unit._y1) / g_txt_height_intl);
-	if(img_size.y<=0.1){
-		auto uw=txt_unit._x1-txt_unit._x0;
-		auto uh=txt_unit._y1-txt_unit._y0;
-		auto img_w=ImGui::GetTextLineHeight();
-		auto img_h=uh*img_w/uw;
-	  img_size={img_w,img_h};
-	}
-	return ImGui::ImageButton((ImTextureID)g_txt_id_intl,img_size,uv0,uv1,flags,frame_padding,bg_col,tint_col);
+bool IconTreeNode(const char *icon_name, const char *label,
+                  ImGuiTreeNodeFlags flags, const char *postfix_icon) {
+  ImGuiContext &g = *GImGui;
+  ImGuiWindow *window = g.CurrentWindow;
+
+  if (window->SkipItems)
+    return false;
+
+  return IconTreeNodeBehavior(window->GetID(label), flags, icon_name, label,
+                              postfix_icon);
+}
+
+
+
+bool IconButton(const char *icon_name, ImVec2 &img_size, int flags,
+                int frame_padding, const ImVec4 &bg_col,
+                const ImVec4 &tint_col) {
+  auto itxt = internal::g_mtxt_intl.find(icon_name);
+  if (itxt == internal::g_mtxt_intl.end()) {
+    assert(false && icon_name && "is invalid icon name!");
+    return false;
+  }
+  auto &txt_unit = *itxt->second;
+  ImVec2 uv0 =
+      ImVec2(txt_unit._x0 / internal::g_txt_width_intl, txt_unit._y0 / internal::g_txt_height_intl);
+  ImVec2 uv1 = ImVec2((txt_unit._x1) / internal::g_txt_width_intl,
+                      (txt_unit._y1) / internal::g_txt_height_intl);
+  if (img_size.y < 0.1f) {
+    auto uw = txt_unit._x1 - txt_unit._x0;
+    auto uh = txt_unit._y1 - txt_unit._y0;
+    auto img_w = ImGui::GetTextLineHeight();
+    auto img_h = uh * img_w / uw;
+    img_size = {img_w, img_h};
+  }
+  return ImGui::ImageButton((ImTextureID)internal::g_txt_id_intl, img_size, uv0, uv1,
+                            flags, frame_padding, bg_col, tint_col);
+}
 }

@@ -23,6 +23,8 @@ namespace vg
       return _texture_id;
 		}
 		void draw();
+		DECLARE_EX_INT
+		DECLARE_DRAW_SEL_ANCHOR
 		void rotate(float angle){ _img_pt._angle_srd = angle; }
 	};
 

@@ -12,7 +12,7 @@ namespace vg
                                 (float,_fovy),
                                 (float,_near),
                                 (float,_far),
-                                (bool,_test_depth),
+                                (bool,_test_depth,false),
                                 (vec4,_bk_clr))
           u32 _fboId = { 0 };
           u32 _colorTextId = { 0 };
@@ -21,6 +21,8 @@ namespace vg
      public:
           hud_projector();
           ~hud_projector();
+          DECLARE_EX_INT
+          DECLARE_DRAW_SEL_ANCHOR
           void link();
           void draw();
           vec3& get_view_pos()

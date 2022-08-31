@@ -1,16 +1,17 @@
 #include "material.h"
 #include "shader_ide.h"
+#include "edit_interface.h"
 namespace vg {
-class shader::material_ide;
-using sd_material_ide = std::shared_ptr<shader::material_ide>;
-void create_item(shader::mp_sd_material& material_list);
-void edit_item(shader::sd_material_ide& sd_mtl_i);
-void select_item(shader::sd_material_ide& sd_mtl_i);
 namespace shader {
-class material_ide : public material {
-public:
-  std::string _shader_name;
-  friend void edit_item(shader::sd_material_ide& sd_mtl_i);
-};
+	class material_ide;
+	using sd_material_ide=std::shared_ptr<material_ide>;
+	class material_ide : public material,edit_interface{
+	protected:
+		std::string _shader_name;
+	public:
+	  bool _sel{false};
+	  void edit_item();
+		//sd_material_ide create_item();
+	};
 } // namespace shader
 } // namespace vg

@@ -70,7 +70,7 @@ void pack_ui_component_data(control_common_def &tar,
 	}
 }
 extern GLuint g_FontTexture;
-extern string g_cureent_directory;
+extern string g_current_directory;
 void afb_output::output_afb(const char *afb_file)
 {
 	ofstream fout;
@@ -86,7 +86,7 @@ void afb_output::output_afb(const char *afb_file)
 	pk.pack_float(control_common_def::screenh); // en_screen_h
 	// vfont_face_name& ft_nm_list = g_pfont_face_manager->get_font_name_list();
 	auto &dic_ft = g_pfont_face_manager->get_dic_fonts();
-	string font_fold_path = g_cureent_directory + font_fold;
+	string font_fold_path = g_current_directory + font_fold;
 	pk.pack_array(dic_ft.size()); // en_font_faces
 	for (auto &ft_item : dic_ft)
 	{
@@ -110,7 +110,7 @@ void afb_output::output_afb(const char *afb_file)
 	pk.pack_int(g_output_bin_format._pgm_fmt);
 	string afb_path(afb_file);
 
-	string output_file_path = afb_path.substr(0, afb_path.find_last_of('\\') + 1); // g_cureent_directory + "afb\\";
+	string output_file_path = afb_path.substr(0, afb_path.find_last_of('\\') + 1); // g_current_directory + "afb\\";
 	int idx = 0;
 	pk.pack_int(0);														// en_vtextures_res_cidx
 	pk.pack_array(g_vpacking_texture.size()); // en_vtextures_res

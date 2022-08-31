@@ -14,6 +14,18 @@
 #include "vg_type.h"
 
 namespace vg {
+enum
+{
+     en_gl_points,
+     en_gl_lines,
+     eg_gl_line_loop,
+     en_gl_line_strip,
+     en_gl_triangles,
+     en_gl_triangle_strip,
+     en_gl_triangle_fan,
+     en_gl_count
+};
+extern GLuint draw_model[en_gl_count];
 namespace shader {
 class shader_variable;
 using sd_shader_variable = std::shared_ptr<shader_variable>;
@@ -126,7 +138,7 @@ public:
   void set_data_to_host() { _phost->set_location(ivalue); }
   void operator=(shader_variable *pother) {
     if (typeid(*this) == typeid(*pother)) {
-      auto cd_other = static_cast<shader_variable<sampler_dumy> *>(pother);
+      auto cd_other = static_cast<shader_variable_T<sampler_dumy> *>(pother);
       ivalue = (*cd_other).value();
     }
   }
@@ -150,7 +162,7 @@ struct fac_shadre_variable_type {
   static fac_shadre_variable_type::shader_type_assist<                         \
       shader_variable_type_en<enKey>>                                          \
       reg##enKey(enKey)
-
+template<>
 class shader_variable_type_en<GL_FLOAT> : public shader_variable_type {
   u32 _ele_size = 1;
 
@@ -165,7 +177,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_VEC2> : public shader_variable_type {
   u32 _ele_size = 2;
 
@@ -180,7 +192,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_VEC2);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_VEC3> : public shader_variable_type {
   u32 _ele_size = 3;
 
@@ -195,7 +207,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_VEC3);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_VEC4> : public shader_variable_type {
   u32 _ele_size = 4;
 
@@ -211,7 +223,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_VEC4);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT2> : public shader_variable_type {
   u32 _ele_size = 4;
 
@@ -226,7 +238,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT2);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT3> : public shader_variable_type {
   u32 _ele_size = 9;
 
@@ -241,7 +253,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT3);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT4> : public shader_variable_type {
   u32 _ele_size = 16;
 
@@ -256,7 +268,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT4);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT2x3> : public shader_variable_type {
   u32 _ele_size = 6;
 
@@ -271,7 +283,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT2x3);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT3x2> : public shader_variable_type {
   u32 _ele_size = 6;
 
@@ -286,7 +298,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT3x2);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT2x4> : public shader_variable_type {
   u32 _ele_size = 8;
 
@@ -301,7 +313,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT2x4);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT4x2> : public shader_variable_type {
   u32 _ele_size = 8;
 
@@ -316,7 +328,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT4x2);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT3x4> : public shader_variable_type {
   u32 _ele_size = 12;
 
@@ -331,7 +343,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT3x4);
-
+template<>
 class shader_variable_type_en<GL_FLOAT_MAT4x3> : public shader_variable_type {
   u32 _ele_size = 12;
 
@@ -346,7 +358,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_FLOAT_MAT4x3);
-
+template<>
 class shader_variable_type_en<GL_INT> : public shader_variable_type {
   u32 _ele_size = 1;
 
@@ -361,7 +373,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_INT);
-
+template<>
 class shader_variable_type_en<GL_INT_VEC2> : public shader_variable_type {
   u32 _ele_size = 2;
 
@@ -376,7 +388,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_INT_VEC2);
-
+template<>
 class shader_variable_type_en<GL_INT_VEC3> : public shader_variable_type {
   u32 _ele_size = 3;
 
@@ -391,7 +403,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_INT_VEC3);
-
+template<>
 class shader_variable_type_en<GL_INT_VEC4> : public shader_variable_type {
   u32 _ele_size = 4;
 
@@ -406,7 +418,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_INT_VEC4);
-
+template<>
 class shader_variable_type_en<GL_BOOL> : public shader_variable_type {
   u32 _ele_size = 1;
 
@@ -421,7 +433,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_BOOL);
-
+template<>
 class shader_variable_type_en<GL_BOOL_VEC2> : public shader_variable_type {
   u32 _ele_size = 2;
 
@@ -436,7 +448,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_BOOL_VEC2);
-
+template<>
 class shader_variable_type_en<GL_BOOL_VEC3> : public shader_variable_type {
   u32 _ele_size = 3;
 
@@ -451,7 +463,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_BOOL_VEC3);
-
+template<>
 class shader_variable_type_en<GL_BOOL_VEC4> : public shader_variable_type {
   u32 _ele_size = 4;
 
@@ -466,7 +478,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_BOOL_VEC4);
-
+template<>
 class shader_variable_type_en<GL_UNSIGNED_INT> : public shader_variable_type {
   u32 _ele_size = 1;
 
@@ -481,7 +493,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_UNSIGNED_INT);
-
+template<>
 class shader_variable_type_en<GL_UNSIGNED_INT_VEC2>
     : public shader_variable_type {
   u32 _ele_size = 2;
@@ -497,7 +509,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_UNSIGNED_INT_VEC2);
-
+template<>
 class shader_variable_type_en<GL_UNSIGNED_INT_VEC3>
     : public shader_variable_type {
   u32 _ele_size = 3;
@@ -513,7 +525,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_UNSIGNED_INT_VEC3);
-
+template<>
 class shader_variable_type_en<GL_UNSIGNED_INT_VEC4>
     : public shader_variable_type {
   u32 _ele_size = 4;
@@ -530,6 +542,7 @@ public:
 };
 REG_SHADER_VARIABLE_TYPE(GL_UNSIGNED_INT_VEC4);
 #ifdef glUniform1dv
+template<>
 class shader_variable_type_en<GL_DOUBLE> : public shader_variable_type {
   u32 _ele_size = 1;
 
@@ -544,7 +557,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_VEC2> : public shader_variable_type {
   u32 _ele_size = 2;
 
@@ -559,7 +572,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_VEC2);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_VEC3> : public shader_variable_type {
   u32 _ele_size = 3;
 
@@ -574,7 +587,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_VEC3);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_VEC4> : public shader_variable_type {
   u32 _ele_size = 4;
 
@@ -589,7 +602,7 @@ public:
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_VEC4);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT2> : public shader_variable_type {
   u32 _ele_size = 4;
 
@@ -599,12 +612,12 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix2dv(_location, _ele_count, pvalue);
+    glUniformMatrix2dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT2);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT3> : public shader_variable_type {
   u32 _ele_size = 9;
 
@@ -614,12 +627,12 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix3dv(_location, _ele_count, pvalue);
+    glUniformMatrix3dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT3);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT4> : public shader_variable_type {
   u32 _ele_size = 16;
 
@@ -629,12 +642,12 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix4dv(_location, _ele_count, pvalue);
+    glUniformMatrix4dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT4);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT2x3> : public shader_variable_type {
   u32 _ele_size = 6;
 
@@ -644,12 +657,12 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix2x3dv(_location, _ele_count, pvalue);
+    glUniformMatrix2x3dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT2x3);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT3x2> : public shader_variable_type {
   u32 _ele_size = 6;
 
@@ -659,12 +672,12 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix3x2dv(_location, _ele_count, pvalue);
+    glUniformMatrix3x2dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT3x2);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT2x4> : public shader_variable_type {
   u32 _ele_size = 8;
 
@@ -674,12 +687,12 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix2x4dv(_location, _ele_count, pvalue);
+    glUniformMatrix2x4dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT2x4);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT4x2> : public shader_variable_type {
   u32 _ele_size = 8;
 
@@ -689,12 +702,12 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix4x2dv(_location, _ele_count, pvalue);
+    glUniformMatrix4x2dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT4x2);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT3x4> : public shader_variable_type {
   u32 _ele_size = 12;
 
@@ -704,12 +717,12 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix3x4dv(_location, _ele_count, pvalue);
+    glUniformMatrix3x4dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT3x4);
-
+template<>
 class shader_variable_type_en<GL_DOUBLE_MAT4x3> : public shader_variable_type {
   u32 _ele_size = 12;
 
@@ -719,14 +732,14 @@ public:
         sd_shader_variable_type(this), _ele_size * _ele_count);
   }
   bool set_location(double *pvalue) {
-    glUniformMatrix4x3dv(_location, _ele_count, pvalue);
+    glUniformMatrix4x3dv(_location, _ele_count, false, pvalue);
     return true;
   }
 };
 REG_SHADER_VARIABLE_TYPE(GL_DOUBLE_MAT4x3);
 
 #endif
-
+template<>
 class shader_variable_type_en<GL_SAMPLER_2D> : public shader_variable_type {
   u32 _ele_size = 1;
 
@@ -811,6 +824,7 @@ public:
   bool vs_valid(){return _valid_vs;}
   bool fs_valid(){return _valid_fs;}
   bool link();
+  void use();
   bool match_format(std::vector<u8> &primitive_fmt);
   template <typename T> bool uniform(std::string unf_name, T tValue) {
     auto iunf = _unf_list.find(unf_name);
@@ -823,7 +837,6 @@ public:
   void spawn_mp_sd_shader_variable(mp_sd_shader_variable &target);
 };
 using sd_shader_base = std::shared_ptr<shader_base>;
-using mp_sd_shder_base = std::map<std::string, sd_shader_base>;
-extern mp_sd_shder_base _mp_sd_shder_bases;
+
 } // namespace shader
 } // namespace vg

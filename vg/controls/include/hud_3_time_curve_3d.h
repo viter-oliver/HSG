@@ -10,7 +10,7 @@ namespace vg
           public control_base
      {
           DEF_STRUCT_WITH_INIT( pty_page, _pt_tb,
-                                ( char, _attached_image[ FILE_NAME_LEN ] ),
+                                ( vui2, _image_txt ),
                                 ( float, _coeff_hac[4] ),
                                 ( bool, _lectl_border, {true} ),
                                 ( float, _width, { 100.f } ),
@@ -19,7 +19,6 @@ namespace vg
                                 ( float, _tanslation_z, { 0.f } ) )
           static shader::sd_shader_base _phud_sd;
           static primitive::sd_primitive_unit _ps_prm;
-          texture::sd_texture_unit _pat_image;
      public:
           hud_3_time_curve_3d();
           ~hud_3_time_curve_3d();

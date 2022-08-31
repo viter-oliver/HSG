@@ -6,9 +6,9 @@ public:
   enum state { en_normal, en_pressed, en_selected, en_state_cnt };
 
 private:
-  DEF_STRUCT_WITH_INIT(intl_pt, _pt, (vi2, _image_normal_txt),
-                       (vi2, _image_press_txt),
-                       (vi2, _image_select_txt),
+  DEF_STRUCT_WITH_INIT(intl_pt, _pt, (vui2, _image_normal_txt),
+                       (vui2, _image_press_txt),
+                       (vui2, _image_select_txt),
                        (vec4, _tint_clr),
                        (vec4, _border_clr)
                        )
@@ -20,7 +20,7 @@ public:
   void draw();
   void set_state(state st) { _state = st; }
   state get_state() { return _state; }
-  vi2& get_cur_txt_id() {
+  vui2& get_cur_txt_id() {
     switch (_state) {
     case button::en_normal:
       return _pt._image_normal_txt;

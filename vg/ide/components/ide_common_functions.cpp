@@ -7,7 +7,8 @@
 namespace vg {
 using namespace std;
 using json = nlohman::json;
-extern string g_cureent_directory;
+extern string g_current_directory;
+using namespace packing_texture;
 void open_file_to_folder(std::string &file_name, const char *folder,
                          const char *dlg_title, const char *str_filter) {
   OPENFILENAME ofn = {sizeof(OPENFILENAME)};
@@ -20,7 +21,7 @@ void open_file_to_folder(std::string &file_name, const char *folder,
   ofn.lpstrTitle = dlg_title;
   ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
   if (GetOpenFileName(&ofn)) {
-    string dest_dir = g_cureent_directory + folder;
+    string dest_dir = g_current_directory + folder;
     string src_file_path = strFileName;
     string src_file_name =
         src_file_path.substr(src_file_path.find_last_of('\\') + 1);
@@ -36,9 +37,7 @@ void load_vector_texture_coordinate_ide_from_json(
   try {
     json jdata_format = json::parse(json_buff, buff_len);
     json frames = jdata_format["frames"];
-    if (frames.isarray())
-
-      int isz = frames.size();
+    int isz = frames.size();
     for (int ix = 0; ix < isz; ++ix) {
       auto &frame = frames[ix];
       bool rotated = frame["rotated"];
@@ -54,11 +53,11 @@ void load_vector_texture_coordinate_ide_from_json(
       }
       vcoor.emplace_back(txt_coor_u);
     }
-    if (txt_coor_u.size() > 0) {
+    if (vcoor.size() > 0) {
       return;
     }
     for (auto &ju : frames.items()) {
-      auto& frame = ju.value["frame"];
+      auto &frame = ju.value["frame"];
       auto txt_coor_u = make_shared<sub_texture_coordinate_ide>();
       txt_coor_u->filename = ju.value["filename"];
       bool rotated = frame["rotated"];

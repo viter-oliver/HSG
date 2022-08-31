@@ -16,7 +16,7 @@
 #include "imgui_impl_glfw_gl3.h"
 //#include "vg_model.h"
 //#include "./fbx_save_info.h"
-extern string g_cureent_directory, g_afb_output_path;
+extern string g_current_directory, g_afb_output_path;
 extern bool show_project_window, show_edit_window, show_property_window,
     show_texture_res_manager, show_fonts_manager, show_file_manager, show_state_manager_edit,
     show_aliase_edit, show_slider_path_picker;
@@ -111,7 +111,7 @@ bool ui_assembler::load_vg_from_file(const char *file_path)
                Value &afb_output_path = jroot["afb_output_path"];
                if (afb_output_path.isNull())
                {
-                    g_afb_output_path = g_cureent_directory + afb_fold;
+                    g_afb_output_path = g_current_directory + afb_fold;
                }
                else
                {
@@ -120,7 +120,7 @@ bool ui_assembler::load_vg_from_file(const char *file_path)
                Value &fonts = jroot["fonts"];
                if (!fonts.isNull())
                {
-                    string str_font_path = g_cureent_directory + font_fold;
+                    string str_font_path = g_current_directory + font_fold;
                     int isz = fonts.size();
                     for (int ix = 0; ix < isz; ix++)
                     {
@@ -155,8 +155,8 @@ bool ui_assembler::load_vg_from_file(const char *file_path)
                Value &texture_list = jroot["texture_list"];
                auto isize = texture_list.size();
                UInt ix = 0;
-               string str_img_path = g_cureent_directory + image_fold;
-               string str_files_path = g_cureent_directory + files_fold;
+               string str_img_path = g_current_directory + image_fold;
+               string str_files_path = g_current_directory + files_fold;
                for (ix = 0; ix < isize; ix++)
                {
                     Value &txt_unit = texture_list[ix];
@@ -230,7 +230,7 @@ bool ui_assembler::load_vg_from_file(const char *file_path)
                }
                Value &shader_list = jroot["shader_list"];
                isize = shader_list.size();
-               string str_shader_path = g_cureent_directory + shaders_fold;
+               string str_shader_path = g_current_directory + shaders_fold;
                for (ix = 0; ix < isize; ix++)
                {
                     Value &shd_unit = shader_list[ix];
@@ -710,7 +710,7 @@ bool ui_assembler::output_ui_component_to_file(const char *file_path)
           }
           jroot["texture_list"] = texture_list;
           Value file_list(arrayValue);
-          string str_files_path = g_cureent_directory + files_fold;
+          string str_files_path = g_current_directory + files_fold;
           for (auto &fileu : g_dic_file_chunk)
           {
                auto &kname = fileu.first;
@@ -728,7 +728,7 @@ bool ui_assembler::output_ui_component_to_file(const char *file_path)
           }
           jroot["file_list"] = file_list;
           Value jshader(arrayValue);
-          string str_shader_path = g_cureent_directory + shaders_fold;
+          string str_shader_path = g_current_directory + shaders_fold;
           for (auto &shd_ut : g_vg_shader_list)
           {
                Value jshd_unit(objectValue);
@@ -1143,7 +1143,7 @@ bool ui_assembler::load_ui_component_from_file(control_common_def &insert_node, 
                {
                     string str_font_path = tar_vg_dir_path + font_fold;
                     int isz = fonts.size();
-                    string cur_vg_font_path = g_cureent_directory + font_fold;
+                    string cur_vg_font_path = g_current_directory + font_fold;
                     for (int ix = 0; ix < isz; ix++)
                     {
                          Value &jfont = fonts[ix];
@@ -1186,7 +1186,7 @@ bool ui_assembler::load_ui_component_from_file(control_common_def &insert_node, 
                     }
                     return ii;
                };
-               string str_res_path = g_cureent_directory + text_res_fold;
+               string str_res_path = g_current_directory + text_res_fold;
                string str_tar_res_path = tar_vg_dir_path + text_res_fold;
                dic_id dic_txt;
                Value &texture_res_list = jroot["texture_res_list"];
@@ -1258,7 +1258,7 @@ bool ui_assembler::load_ui_component_from_file(control_common_def &insert_node, 
                auto isize = texture_list.size();
                UInt ix = 0;
                string str_img_path = tar_vg_dir_path + image_fold;
-               string str_cur_img_path = g_cureent_directory + image_fold;
+               string str_cur_img_path = g_current_directory + image_fold;
                for (ix = 0; ix < isize; ix++)
                {
                     Value &txt_unit = texture_list[ix];
@@ -1326,7 +1326,7 @@ bool ui_assembler::load_ui_component_from_file(control_common_def &insert_node, 
                     SOIL_free_image_data(imgdata);
                }
                string str_files_path = tar_vg_dir_path + files_fold;
-               string str_cur_file_path = g_cureent_directory + files_fold;
+               string str_cur_file_path = g_current_directory + files_fold;
                Value &file_list = jroot["file_list"];
                auto fsize = file_list.size();
                for (ix = 0; ix < fsize; ix++)
@@ -1368,7 +1368,7 @@ bool ui_assembler::load_ui_component_from_file(control_common_def &insert_node, 
                Value &shader_list = jroot["shader_list"];
                isize = shader_list.size();
                string str_shader_path = tar_vg_dir_path + shaders_fold;
-               string str_cur_shader_path = g_cureent_directory + shaders_fold;
+               string str_cur_shader_path = g_current_directory + shaders_fold;
                for (ix = 0; ix < isize; ix++)
                {
                     Value &shd_unit = shader_list[ix];
@@ -1722,7 +1722,7 @@ bool ui_assembler::load_ui_component_from_file(control_common_def &insert_node, 
                     Value &jprop_list = jcmv["prop_list"];
                     string vtype = jcmv["type"].asString();
                     auto rg = mname.substr(mname.length() - 3, 3);
-                    auto pcmv = make_shared<base_prp_type>(vtype);
+                    auto pcmv = make_shared<base_common_type>(vtype);
                     auto &mvalue = pcmv->_pbase;
                     auto &pmlist = pcmv->_param_list;
                     if (vtype == "int")

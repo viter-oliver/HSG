@@ -5,12 +5,12 @@
 
 namespace vg{
   using namespace std;
-  extern string g_cureent_directory;
+  extern string g_current_directory;
   void res_unit_2_msgpack_stream(mpk_stream& mpk,font_unit& res_unit){
     mpk.pack_array(3);
     mpk.pack_fix_uint32(res_unit._char_count_c);
     mpk.pack_fix_uint32(res_unit._char_count_r);
-    string font_path=g_cureent_directory+font_fold+res_unit._name;
+    string font_path=g_current_directory+font_fold+res_unit._name;
     get_file_data(font_path,[&](char* file_buff,u32 dataLen){
       mpk.pack_bin(dataLen);
       mpk.pack_bin_body(file_buff,dataLen);

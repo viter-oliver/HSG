@@ -14,9 +14,8 @@ namespace vg
 		float _values[MAX_VALUE_COUNT] ;
 		int _algebra{ 0 };
 	public:
-		plot_lines();
-		
 		void draw();
+		DECLARE_EX_INT
 	};
 	REG_CTL_2_FAC(plot_lines);
 }

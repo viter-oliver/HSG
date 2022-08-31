@@ -7,7 +7,7 @@
 namespace vg {
 using namespace std;
 using json = nlohmann::json;
-extern string g_cureent_directory;
+extern string g_current_directory;
 void res_unit_2_json(json &jTar,
                      packing_texture::packing_texture_unit_ide &res_unit) {
   jTar["name"]=res_unit.name;
@@ -22,7 +22,7 @@ bool json_2_res_unit(packing_texture::packing_texture_unit_ide &res_unit,
     res_unit.name=jsrc["name"];
     res_unit.texture_pack_file = jsrc["texture_pack_file"];
     res_unit.texture_data_file = jsrc["texture_data_file"];
-    string path_texture_pack_file = g_cureent_directory + text_res_fold;
+    string path_texture_pack_file = g_current_directory + packing_texture_fold;
     string path_texture_data_file = path_texture_pack_file;
     path_texture_pack_file += res_unit.texture_pack_file;
     path_texture_data_file += res_unit.texture_data_file;

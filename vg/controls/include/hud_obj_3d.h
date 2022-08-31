@@ -9,7 +9,7 @@ namespace vg
           public control_base
      {
           DEF_STRUCT_WITH_INIT( pty_page, _pt_tb,
-                                ( char, _attached_image[ FILE_NAME_LEN ] ),
+                                ( vui2, _image_txt ),
                                 ( float, _tanslation_x, {0.f} ),
                                 ( float, _tanslation_y, {0.f} ),
                                 ( float, _tanslation_z, {0.f} ) )
@@ -21,6 +21,7 @@ namespace vg
 
           hud_obj_3d();
           ~hud_obj_3d();
+          
           void link();
           void draw();
           void set_transx( float transx )

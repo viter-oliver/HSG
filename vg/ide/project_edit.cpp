@@ -1,25 +1,17 @@
 #include "project_edit.h"
 #include "user_control_imgui.h"
-#include "res_output.h"
 #include <GLFW/glfw3.h>
 #include "command_element_delta.h"
-#include "vg_state_manager.h"
+#include "state_manager.h"
 #include <map>
 #include "common_functions.h"
 #include "aliase_edit.h"
 #include "base_prp_type_edit.h"
 #include "bind_edit.h"
-extern aliase_edit g_aliase_edit;
-extern common_value_edit g_common_value_edit;
-extern bind_edit g_bind_edit;
-/*
-1�������ĩ����flags|leaf������flags|openonarrow
-2������node����selectable,���ctrl�����ϴε�node��selected״̬������˴�!ctrl�������ϴε�selected node״̬
-3�����ж��node����selected״̬����ݲ˵�ֻ��copy��addsiblings��ִ��add siblingʱ����ĩ���򸸼�Ѱ��selected��node��ִ�и�����Ϊ
-4��root��ѡ��ʱ������ִ��addsibling
-*/
 
-void project_edit::view_object(control_common_def& fb)
+namespace vg{
+
+void project_edit::view_object(control_base& fb)
 {
      bool beparent = fb.get_child_count() > 0;
 
@@ -59,7 +51,7 @@ void project_edit::view_object(control_common_def& fb)
 		{
 			for (size_t ix = 0; ix < fb.get_child_count(); ix++)
 			{
-				control_common_def* pchild = fb.get_child(ix);
+				control_base* pchild = fb.get_child(ix);
 				view_object(*pchild);
 			}
 		}
@@ -90,7 +82,7 @@ void project_edit::objects_view()
 }
 void project_edit::move_item_pre()
 {
-     control_common_def* pparent = _pcurrent_object->get_parent();
+     control_base* pparent = _pcurrent_object->get_parent();
      if( pparent )
      {
           pparent->move_pre( _pcurrent_object );
@@ -98,7 +90,7 @@ void project_edit::move_item_pre()
 }
 void project_edit::move_item_next()
 {
-     control_common_def* pparent = _pcurrent_object->get_parent();
+     control_base* pparent = _pcurrent_object->get_parent();
      if( pparent )
      {
           pparent->move_next( _pcurrent_object );
@@ -186,7 +178,7 @@ void project_edit::add_item()
 	string cur_cname = typeid(*_pcurrent_object).name();
 	cur_cname = cur_cname.substr(sizeof("class autofuture::"));
 
-     factory::get().iterate_types( [&]( string cname, function<control_common_def*( )> infun )
+     factory::get().iterate_types( [&]( string cname, function<control_base*( )> infun )
      {
           if( !allow_add_item(cur_cname,cname))
           {
@@ -196,7 +188,7 @@ void project_edit::add_item()
 		if (ImGui::MenuItem(cname.c_str(), NULL, false,infun!=nullptr))
 		{
 
-			control_common_def* pchild = infun();
+			control_base* pchild = infun();
 			string chd_name = _pcurrent_object->try_create_a_child_name(cname);
 			pchild->set_name(chd_name);
 			_pcurrent_object->add_child(pchild);
@@ -215,7 +207,7 @@ void project_edit::insert_item()
      bool is_ctl_modeling = cur_cname == "ctl_modeling_3d";
      bool is_trans = cur_cname == "ctl_trans";
      bool is_material_3d = cur_cname == "ctl_material_3d";
-     factory::get().iterate_types( [&]( string cname, function<control_common_def*( )> infun )
+     factory::get().iterate_types( [&]( string cname, function<control_base*( )> infun )
      {
           if( !allow_add_item( cur_cname, cname ) )
           {
@@ -225,7 +217,7 @@ void project_edit::insert_item()
           if( ImGui::MenuItem( cname.c_str(), NULL, false, infun != nullptr ) )
           {
 
-               control_common_def* pchild = infun();
+               control_base* pchild = infun();
                auto pparent = _pcurrent_object->get_parent();
                string chd_name = pparent->try_create_a_child_name( cname );
                pchild->set_name( chd_name );
@@ -240,7 +232,7 @@ void project_edit::add_sibling()
 {
      if( auto pparent = _pcurrent_object->get_parent() )
      {
-          control_common_def* psibling = get_copy_of_object( _pcurrent_object );
+          control_base* psibling = get_copy_of_object( _pcurrent_object );
           string chd_name = pparent->try_create_a_child_name( _pcurrent_object->get_name() );
           psibling->set_name( chd_name );
           pparent->add_child( psibling );
@@ -248,92 +240,9 @@ void project_edit::add_sibling()
 }
 void project_edit::delete_item()
 {
-     control_common_def* pparent = _pcurrent_object->get_parent();
+     control_base* pparent = _pcurrent_object->get_parent();
      if( pparent )
      {
-          /**
-          bool find_ref = false;
-          string obj_name;
-          auto find_ref_in_mstate_manager = [&]( control_common_def* pobj, string& obj_name )
-          {
-               for( auto& istm : g_mstate_manager )
-               {
-                    auto& stm = *istm.second;
-                    int ix = 0, isz = stm._prop_list.size();
-                    for( ; ix < isz; ix++ )
-                    {
-                         auto& prp_pos = stm._prop_list[ ix ];
-                         if( prp_pos._pobj == pobj )
-                         {
-                              obj_name = istm.first;
-                              return true;
-                         }
-                    }
-               }
-               return false;
-          };
-          auto find_ref_in_alias = [&]( control_common_def* pobj, string& obj_name )
-          {
-               for( auto& ialias : g_aliase_dic )
-               {
-                    auto& ele_pos = *ialias.second;
-                    if( ele_pos._pobj == pobj )
-                    {
-                         obj_name = ialias.first;
-                         return true;
-                    }
-               }
-               return false;
-          };
-          auto find_ref_in_binds = [&]( control_common_def* pobj, string& obj_name )
-          {
-               for( auto& ibind : g_bind_dic )
-               {
-                    if( ibind.first._pobj == pobj )
-                    {
-                         obj_name = ibind.first._pobj->get_name();
-                         return true;
-                    }
-               }
-               for( auto& ibindrec : g_bind_ref_dic )
-               {
-                    if( ibindrec.first._pobj == pobj )
-                    {
-                         obj_name = ibindrec.first._pobj->get_name();
-                         return true;
-                    }
-               }
-               return false;
-          };
-          find_ref = find_ref_in_mstate_manager( _pcurrent_object, obj_name );
-
-          if( find_ref )
-          {
-               string dlg_content = "you can't delete the node, because the node is referenced by state manager:";
-               dlg_content += obj_name;
-               MessageBox( GetForegroundWindow(), dlg_content.c_str(), "Warning", MB_OK );
-               ImGui::EndPopup();
-               return;
-          }
-          find_ref = find_ref_in_alias( _pcurrent_object, obj_name );
-          if( find_ref )
-          {
-               string dlg_content = "you can't delete the node, because the node is referenced by alias:";
-               dlg_content += obj_name;
-               MessageBox( GetForegroundWindow(), dlg_content.c_str(), "Warning", MB_OK );
-               ImGui::EndPopup();
-               return;
-          }
-          find_ref = find_ref_in_binds( _pcurrent_object, obj_name );
-          if( find_ref )
-          {
-               string dlg_content = "you can't delete the node, because the node is referenced by binds:";
-               dlg_content += obj_name;
-               MessageBox( GetForegroundWindow(), dlg_content.c_str(), "Warning", MB_OK );
-               ImGui::EndPopup();
-               return;
-          }
-          */
           g_aliase_edit.clear_sel();
           g_common_value_edit.clear_sel();
           g_bind_edit.clear_sel();
@@ -415,8 +324,9 @@ void project_edit::clear_sel_item()
 {
      if( _pcurrent_object )
      {
-          _pcurrent_object->set_selected( false );
+          _pcurrent_object->sel= false ;
      }
      _pcurrent_object = nullptr;
      _pcopy_object = nullptr;
+}
 }

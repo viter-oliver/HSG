@@ -6,7 +6,6 @@
 #include "primitive.h"
 namespace vg {
 namespace primitive {
-mp_primitive_unit _mp_primitive_units;
 primitive_unit::~primitive_unit() {
   if (_vao) {
     glDeleteVertexArrays(1, &_vao);

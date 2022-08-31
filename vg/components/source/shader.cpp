@@ -1,5 +1,9 @@
 #include "shader.h"
 namespace vg {
+GLuint draw_model[en_gl_count] = {
+    GL_POINTS,    GL_LINES,          GL_LINE_LOOP,    GL_LINE_STRIP,
+    GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN,
+};
 namespace shader {
 using namespace std;
 struct vtype_size {
@@ -163,6 +167,7 @@ bool shader_base::link() {
   refresh_viarable_list();
   return true;
 }
+void shader_base::use() { glUseProgram(_program_id); }
 bool shader_base::match_format(std::vector<u8> &primitive_fmt) {
   if (!_valid || primitive_fmt.size() != _att_list.size()) {
     return false;
@@ -182,5 +187,5 @@ void shader_base::spawn_mp_sd_shader_variable(mp_sd_shader_variable &target) {
   }
 }
 mp_sd_shder_base _mp_sd_shder_bases;
-} // namespace pipeline
+} // namespace shader
 } // namespace vg

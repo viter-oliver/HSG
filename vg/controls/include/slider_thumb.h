@@ -10,7 +10,7 @@ class AFG_EXPORT slider_thumb : public control_base {
                        (float, _size_minw, {20.f}), (float, _size_minh, {20.f}),
                        (float, _pos_maxx, {20.f}), (float, _pos_maxy, {20.f}),
                        (float, _size_maxw, {40.f}), (float, _size_maxh, {40.f}),
-                       (vi2, _thumb_id_txt))
+                       (vui2, _thumb_id_txt))
 
 #if defined(WITHIN_IDE)
   bool _keep_min_scale{false};

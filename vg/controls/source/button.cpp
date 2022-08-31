@@ -9,7 +9,7 @@ namespace vg
 	void button::draw()
 	{
 		auto& tintClr=_pt._tint_clr;
-    auto& bdClr=_pt._border_clr;
+        auto& bdClr=_pt._border_clr;
 		vec2 draw_pos=absolute_coordinate_of_base_pos();
 		packing_texture::draw_rect(get_cur_txt_id(),draw_pos,size(),tintClr,bdClr);
 	}

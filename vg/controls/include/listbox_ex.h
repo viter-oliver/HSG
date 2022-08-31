@@ -9,6 +9,8 @@ class AFG_EXPORT listbox_ex : public control_base {
 public:
   listbox_ex();
   void draw();
+  DECLARE_EX_INT
+  DECLARE_DRAW_SEL_ANCHOR
 };
 REG_CTL_2_FAC(listbox_ex);
 } // namespace vg

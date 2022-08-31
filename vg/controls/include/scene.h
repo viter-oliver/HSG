@@ -18,7 +18,8 @@ namespace vg
 		scene();
 		~scene();
 		void link();
-    void draw();
+        void draw();
+		DECLARE_EX_INT
 	};
 	REG_CTL_2_FAC(scene);
 }

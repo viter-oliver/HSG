@@ -8,7 +8,7 @@ namespace vg {
 using json = nlohmann::json;
 using namespace std;
 using namespace texture;
-extern string g_cureent_directory;
+extern string g_current_directory;
 void res_unit_2_json(nlohmann::json &jTar, texture::sd_texture_unit pres_unit,
                      std::string &res_unit_name) {
   jTar["name"] = res_unit_name;
@@ -19,7 +19,7 @@ bool json_2_res_unit(texture::sd_texture_unit pres_unit,
                      std::string &res_unit_name, nlohmann::json &jsrc) {
   try {
     res_unit_name = jsrc["name"];
-    string img_file_path = g_cureent_directory + texture_fold + res_unit_name;
+    string img_file_path = g_current_directory + texture_fold + res_unit_name;
     pres_unit = make_shared<texture_unit>();
     pres_unit->_separated = jsrc["separated"];
     pres_unit->_mipmap = jsrc["mipmap"];

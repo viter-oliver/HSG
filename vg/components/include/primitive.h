@@ -25,7 +25,6 @@ struct primitive_unit {
   void enableVertex();
 };
 using sd_primitive_unit=std::shared_ptr<primitive_unit>;
-using mp_primitive_unit=std::map<std::string,sd_primitive_unit>;
-extern mp_primitive_unit _mp_primitive_units;
+
 } // namespace primitive
 } // namespace vg

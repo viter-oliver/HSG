@@ -55,7 +55,7 @@ void common_value_edit::view_base_prp_list()
           ImGui::Combo( "The type of common value", &tpidx, vtyps, IM_ARRAYSIZE( vtyps ) );
           if (ImGui::Button("Save"))
           {
-               auto icv = make_shared<base_prp_type>( vtyps[ tpidx ] );
+               auto icv = make_shared<base_common_type>( vtyps[ tpidx ] );
                string prekn = sal_name_str;
                string key_cv = find_a_key_from_mp( g_base_prp_dic, prekn );
                g_base_prp_dic[ key_cv ] = icv;

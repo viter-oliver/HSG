@@ -1,6 +1,7 @@
 #pragma once
 //#prama execution_character_set("utf-8")
 #define TXT_BUFF_SZ 1024 * 16
+#define vg_print(...) printf("%s:%d ",__func__,__LINE__);printf(__VA_ARGS__)
 #include <math.h>
 namespace vg {
 using u8 = unsigned char;

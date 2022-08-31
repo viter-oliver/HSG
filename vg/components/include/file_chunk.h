@@ -18,6 +18,4 @@ struct file_chunk_unit {
   ~file_chunk_unit();
 };
 using sd_file_chunk_unit = std::shared_ptr<file_chunk_unit>;
-using mp_file_chunk = std::map<std::string, sd_file_chunk_unit>;
-extern mp_file_chunk _mp_file_chunk;
 } // namespace vg

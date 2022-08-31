@@ -1,5 +1,4 @@
 #pragma once
-#include "res_output.h"
 #include <nlohmann/json.hpp>
 #include "res_internal.h"
 using namespace Json;

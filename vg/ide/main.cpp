@@ -84,7 +84,7 @@ static void error_callback(int error, const char *description)
      fprintf(stderr, "Error %d: %s\n", error, description);
 }
 string g_cureent_project_file_path;
-string g_cureent_directory;
+string g_current_directory;
 string g_current_running_directory;
 string g_afb_output_path;
 bind_edit g_bind_edit;
@@ -143,7 +143,7 @@ void drag_dop_callback(GLFWwindow *wh, int cnt, const char **fpaths)
 {
      int last_id = cnt - 1;
      g_cureent_project_file_path = fpaths[last_id];
-     g_cureent_directory = g_cureent_project_file_path.substr(0, g_cureent_project_file_path.find_last_of('\\') + 1);
+     g_current_directory = g_cureent_project_file_path.substr(0, g_cureent_project_file_path.find_last_of('\\') + 1);
      if (g_ui_edit_command_mg.undo_able() || g_ui_edit_command_mg.redo_able())
      {
           int result = MessageBox(GetForegroundWindow(), "Save changes to the current project?", "HardStoneGraphics designer", MB_YESNOCANCEL);
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
      if (argc > 1)
      {
           g_cureent_project_file_path = argv[1];
-          g_cureent_directory = g_cureent_project_file_path.substr(0, g_cureent_project_file_path.find_last_of('\\') + 1);
+          g_current_directory = g_cureent_project_file_path.substr(0, g_cureent_project_file_path.find_last_of('\\') + 1);
      }
 
      glfwSetErrorCallback(error_callback);
@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
      //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
      if (0) //!g_cureent_project_file_path.empty())
      {
-          string str_font_path = g_cureent_directory;
+          string str_font_path = g_current_directory;
           str_font_path += "fonts\\";
           string FZLanTingHeiS = str_font_path + "FZLanTingHeiS-R-GB.ttf";
           //string arial = str_font_path +"arialuni.ttf";
@@ -484,7 +484,7 @@ int main(int argc, char *argv[])
                          _proot = NULL;
                     }
                     g_cureent_project_file_path = strFileName;
-                    g_cureent_directory = g_cureent_project_file_path.substr(0, g_cureent_project_file_path.find_last_of('\\') + 1);
+                    g_current_directory = g_cureent_project_file_path.substr(0, g_cureent_project_file_path.find_last_of('\\') + 1);
                     _proot = new ft_base;
                     _proot->set_name("screen");
                     ui_assembler _ui_as(*_proot);
@@ -512,14 +512,14 @@ int main(int argc, char *argv[])
                     if (GetSaveFileName(&sfn))
                     {
                          g_cureent_project_file_path = strFileName;
-                         g_cureent_directory = g_cureent_project_file_path.substr(0, g_cureent_project_file_path.find_last_of('\\') + 1);
-                         string mesh_path = g_cureent_directory + mesh_fold;
-                         string font_path = g_cureent_directory + font_fold;
-                         string files_path = g_cureent_directory + files_fold;
-                         string image_path = g_cureent_directory + image_fold;
-                         string shader_path = g_cureent_directory + shaders_fold;
-                         string text_res_path = g_cureent_directory + text_res_fold;
-                         g_afb_output_path = g_cureent_directory + afb_fold;
+                         g_current_directory = g_cureent_project_file_path.substr(0, g_cureent_project_file_path.find_last_of('\\') + 1);
+                         string mesh_path = g_current_directory + mesh_fold;
+                         string font_path = g_current_directory + font_fold;
+                         string files_path = g_current_directory + files_fold;
+                         string image_path = g_current_directory + image_fold;
+                         string shader_path = g_current_directory + shaders_fold;
+                         string text_res_path = g_current_directory + text_res_fold;
+                         g_afb_output_path = g_current_directory + afb_fold;
                          createDirectory(mesh_path.c_str());
                          createDirectory(font_path.c_str());
                          createDirectory(files_path.c_str());
@@ -630,7 +630,7 @@ int main(int argc, char *argv[])
      condition_variable td_backup_sleep_con;
      auto backup_tast = [&]
      {
-          afg_fs::path prj_path = afg_fs::system_complete(g_cureent_directory);
+          afg_fs::path prj_path = afg_fs::system_complete(g_current_directory);
           string prj_file_name = g_cureent_project_file_path.substr(g_cureent_project_file_path.find_last_of('\\') + 1);
           string str_reg = prj_file_name + "_bk_";
           while (keep_backup_thread)
@@ -693,7 +693,7 @@ int main(int argc, char *argv[])
                file_chunk_unit file_unit = {s_file_name, time(nullptr)};
                backup_list.emplace_back(file_unit);
                ui_assembler _ui_as(*_proot_backup);
-               string file_full_name = g_cureent_directory + s_file_name;
+               string file_full_name = g_current_directory + s_file_name;
                _ui_as.output_ui_component_to_file(file_full_name.c_str());
                int idf = backup_list.size() - g_prj_backup_mg.backup_max_cnt;
                if (idf > 0)
@@ -701,7 +701,7 @@ int main(int argc, char *argv[])
                     for (int ix = 0; ix < idf; ++ix)
                     {
                          auto &fu = backup_list[0];
-                         string fname = g_cureent_directory + fu.file_name;
+                         string fname = g_current_directory + fu.file_name;
                          afg_fs::path dlfile_path(fname);
                          afg_fs::remove(dlfile_path);
                          backup_list.erase(backup_list.begin());
@@ -1266,7 +1266,7 @@ int main(int argc, char *argv[])
                }
                else
                {
-                    if (!td_backup.joinable() && afg_fs::exists(g_cureent_directory))
+                    if (!td_backup.joinable() && afg_fs::exists(g_current_directory))
                     {
                          keep_backup_thread = true;
                          td_backup = /*boost::*/ thread(backup_tast);
@@ -1303,7 +1303,7 @@ int main(int argc, char *argv[])
                          ImGui::SameLine();
                          if (ImGui::Button(btn_cap.c_str()))
                          {
-                              string fname = g_cureent_directory + prj_list[ix].file_name;
+                              string fname = g_current_directory + prj_list[ix].file_name;
                               string str_cmd = "copy ";
                               str_cmd += g_cureent_project_file_path;
                               str_cmd += " ";
@@ -1327,7 +1327,7 @@ int main(int argc, char *argv[])
                          btn_cap += stm_sel.str();
                          if (ImGui::Button(btn_cap.c_str()))
                          {
-                              string fname = g_cureent_directory + prj_list[ix].file_name;
+                              string fname = g_current_directory + prj_list[ix].file_name;
                               afg_fs::path dlfile_path(fname);
                               afg_fs::remove(dlfile_path);
                               prj_list.erase(prj_list.begin() + ix);

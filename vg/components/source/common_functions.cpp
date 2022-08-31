@@ -57,147 +57,7 @@ std::wstring utf8ToWstring(const std::string &str) {
 x'=(x-a)cos��+(y-b)sin��+a
 y'=-(x-a)sin��+(y-b)cos��+b
 */
-using namespace Json;
 
-GLfloat *get_txt_uvs(const char *data_file, int &retn_len) {
-  GLfloat *puvs = NULL;
-  Reader reader;
-  Value jvalue;
-  if (reader.parse(data_file, jvalue, false)) {
-    Value &meta = jvalue["meta"];
-    Value &jsize = meta["size"];
-    float w = jsize["w"].asInt();
-    float h = jsize["h"].asInt();
-    Value &frames = jvalue["frames"];
-    if (frames.isArray()) {
-      int isize = frames.size();
-      retn_len = isize * 8;
-      puvs = new GLfloat[retn_len];
-      for (int ix = 0; ix < isize; ix++) {
-        Value &frame_unit = frames[ix];
-        Value &frame = frame_unit["frame"];
-        int sbidx = ix * 8;
-        float x0 = frame["x"].asInt();
-        float y0 = frame["y"].asInt();
-        float x1 = x0 + frame["w"].asInt();
-        float y1 = y0 + frame["h"].asInt();
-
-        puvs[sbidx + 0] = x0 / w;
-        puvs[sbidx + 1] = y0 / h;
-
-        puvs[sbidx + 2] = x1 / w;
-        puvs[sbidx + 3] = y0 / h;
-        puvs[sbidx + 4] = x0 / w;
-        puvs[sbidx + 5] = y1 / h;
-        puvs[sbidx + 6] = x1 / w;
-        puvs[sbidx + 7] = y1 / h;
-      }
-    }
-    if (frames.isObject()) {
-      Value::Members memb(frames.getMemberNames());
-      retn_len = memb.size() * 8;
-      puvs = new GLfloat[retn_len];
-      int idx = 0;
-      for (auto itmem = memb.begin(); itmem != memb.end(); ++itmem, ++idx) {
-        auto &mname = *itmem;
-        Value &junif = frames[mname];
-        Value &frame = junif["frame"];
-        int sbidx = idx * 8;
-        float x0 = frame["x"].asInt();
-        float y0 = frame["y"].asInt();
-        float x1 = x0 + frame["w"].asInt();
-        float y1 = y0 + frame["h"].asInt();
-
-        puvs[sbidx + 0] = x0 / w;
-        puvs[sbidx + 1] = y0 / h;
-
-        puvs[sbidx + 2] = x1 / w;
-        puvs[sbidx + 3] = y0 / h;
-        puvs[sbidx + 4] = x0 / w;
-        puvs[sbidx + 5] = y1 / h;
-        puvs[sbidx + 6] = x1 / w;
-        puvs[sbidx + 7] = y1 / h;
-        /*puvs[sbidx + 0] = x1 / w;
-        puvs[sbidx + 1] = y0 / h;
-        puvs[sbidx + 2] = x1 / w;
-        puvs[sbidx + 3] = y1 / h;
-        puvs[sbidx + 4] = x0 / w;
-        puvs[sbidx + 5] = y0 / h;
-        puvs[sbidx + 6] = x1 / w;
-        puvs[sbidx + 7] = y0 / h;*/
-      }
-    }
-  }
-  return puvs;
-}
-void get_txt_uv_vector(const char *data_file, packing_txt_cd &vtxt_cd) {
-  Reader reader;
-  Value jvalue;
-  if (reader.parse(data_file, jvalue, false)) {
-    Value &meta = jvalue["meta"];
-    Value &jsize = meta["size"];
-    float w = jsize["w"].asInt();
-    float h = jsize["h"].asInt();
-    Value &frames = jvalue["frames"];
-    if (frames.isArray()) {
-      int isize = frames.size();
-      for (int ix = 0; ix < isize; ix++) {
-        vtxt_cd.emplace_back();
-        packing_texture_coordinate &res_txt_cd = vtxt_cd[ix];
-        Value &frame_unit = frames[ix];
-        Value &frame = frame_unit["frame"];
-        Value &filename = frame_unit["filename"];
-        res_txt_cd._file_name = filename.asString();
-
-        bool rotated = frame["rotated"].asBool();
-        res_txt_cd._x0 = frame["x"].asInt();
-        res_txt_cd._y0 = frame["y"].asInt();
-        res_txt_cd._x1 = frame["x"].asInt() + frame["w"].asInt();
-        res_txt_cd._y1 = frame["y"].asInt() + frame["h"].asInt();
-
-        if (rotated) {
-          res_txt_cd._x1 = frame["x"].asInt() + frame["h"].asInt();
-          ;
-          res_txt_cd._y1 = frame["y"].asInt() + frame["w"].asInt();
-        }
-      }
-    }
-    if (frames.isObject()) {
-      Value::Members memb(frames.getMemberNames());
-      int idx = 0;
-      for (auto itmem = memb.begin(); itmem != memb.end(); ++itmem, ++idx) {
-        vtxt_cd.emplace_back();
-        packing_texture_coordinate &res_txt_cd = vtxt_cd[idx];
-        auto &mname = *itmem;
-        Value &junif = frames[mname];
-        Value &frame = junif["frame"];
-        Value &filename = junif["filename"];
-        res_txt_cd._file_name = filename.asString();
-
-        bool rotated = frame["rotated"].asBool();
-        res_txt_cd._x0 = frame["x"].asInt();
-        res_txt_cd._y0 = frame["y"].asInt();
-        res_txt_cd._x1 = frame["x"].asInt() + frame["w"].asInt();
-        res_txt_cd._y1 = frame["y"].asInt() + frame["h"].asInt();
-
-        if (rotated) {
-          res_txt_cd._x1 = frame["x"].asInt() + frame["h"].asInt();
-          ;
-          res_txt_cd._y1 = frame["y"].asInt() + frame["w"].asInt();
-        }
-      }
-    }
-  }
-}
-AFG_EXPORT ImVec2 rotate_point_by_zaxis(ImVec2 &tar, float angle,
-                                        ImVec2 &basePoint) {
-  ImVec2 des;
-  des.x = (tar.x - basePoint.x) * cos(angle) +
-          (tar.y - basePoint.y) * sin(angle) + basePoint.x;
-  des.y = -(tar.x - basePoint.x) * sin(angle) +
-          (tar.y - basePoint.y) * cos(angle) + basePoint.y;
-  return des;
-}
 bool prepareFBO1(GLuint &colorTextId, GLuint &depthStencilTextId, GLuint &fboId,
                  GLuint frame_width, GLuint frame_height) {
   glGenFramebuffers(1, &fboId);
@@ -466,12 +326,14 @@ void convert_string_to_binary(string &in_str, string &out_bin) {
     out_bin[ix] = high << 4 | low;
   }
 }
-unsigned int conver_track_buff_to_pair(char *pbuff, unsigned int buff_len,
-                                       vector<ImVec2> &vtrack0,
-                                       vector<ImVec2> &vtrack1) {
+using namespace vg;
+
+u32 conver_track_buff_to_pair(char *pbuff, u32 buff_len,
+                                       vector<vec2> &vtrack0,
+                                       vector<vec2> &vtrack1) {
   int *parray_len = (int *)pbuff;
   int array_len = *parray_len;
-  int wtrack_sz = sizeof(ImVec2) * array_len;
+  int wtrack_sz = sizeof(vec2) * array_len;
   int bf_track_sz = buff_len - sizeof(int);
   if (wtrack_sz * 2 != bf_track_sz) {
     printf("invalid slider track buff\n");
@@ -486,7 +348,7 @@ unsigned int conver_track_buff_to_pair(char *pbuff, unsigned int buff_len,
   return array_len;
 }
 // 5��3��ƽ����
-bool smooth_algorithm_5_points_3_times(vector<ImVec2> &point_list,
+bool smooth_algorithm_5_points_3_times(vector<vec2> &point_list,
                                        bool x_direction) {
   int pt_cnt = point_list.size();
   if (pt_cnt < 5) {
@@ -522,7 +384,7 @@ bool smooth_algorithm_5_points_3_times(vector<ImVec2> &point_list,
   return true;
 }
 //ֱ��3��ƽ��ƽ����
-bool smooth_algoritm_3_points_average(vector<ImVec2> &point_list,
+bool smooth_algoritm_3_points_average(vector<vec2> &point_list,
                                       bool x_direction) {
   int pt_cnt = point_list.size();
   if (pt_cnt < 4) {
@@ -580,7 +442,7 @@ bool smooth_algoritm_3_points_average(vector<ImVec2> &point_list,
   return true;
 }
 //ֱ��5��ƽ��ƽ����
-bool smooth_algorithm_5_points_average(vector<ImVec2> &point_list,
+bool smooth_algorithm_5_points_average(vector<vec2> &point_list,
                                        bool x_direction) {
   int pt_cnt = point_list.size();
   if (pt_cnt < 5) {
@@ -695,9 +557,9 @@ void FromYUY2ToBGR32(LPVOID lpDest, LPVOID lpSource, LONG lWidth,
     pDestPel += lWidth;
   }
 }
-bool RayCastingAlgorithmPointWithin(std::vector<vg::vec2>& polygon,vg::vec2& tar){
+bool RayCastingAlgorithmPointWithin(std::vector<vg::vec2>& polygon, vg::vec2& tar) {
   auto pt_cnt=polygon.size();
-  if(pt_ct<3) return false;
+  if(pt_cnt<3) return false;
   auto last_i=pt_cnt-1;
   int crossings=0;
   for(auto i=0;i<last_i;++i){
