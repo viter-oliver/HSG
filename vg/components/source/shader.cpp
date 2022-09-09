@@ -168,12 +168,12 @@ bool shader_base::link() {
   return true;
 }
 void shader_base::use() { glUseProgram(_program_id); }
-bool shader_base::match_format(std::vector<u8> &primitive_fmt) {
-  if (!_valid || primitive_fmt.size() != _att_list.size()) {
+bool shader_base::match_format(std::vector<u8> &vertec_fmt) {
+  if (!_valid || vertec_fmt.size() != _att_list.size()) {
     return false;
   }
-  for (u8 ix = 0; ix < primitive_fmt.size(); ++ix) {
-    const auto &fmt_stride = primitive_fmt[ix];
+  for (u8 ix = 0; ix < vertec_fmt.size(); ++ix) {
+    const auto &fmt_stride = vertec_fmt[ix];
     const auto &attr_unit = *_att_list[ix];
     if (fmt_stride != attr_unit._size) {
       return false;
@@ -186,6 +186,5 @@ void shader_base::spawn_mp_sd_shader_variable(mp_sd_shader_variable &target) {
     target[unf_u.first] = unf_u.second->spawn_variable();
   }
 }
-mp_sd_shder_base _mp_sd_shder_bases;
 } // namespace shader
 } // namespace vg

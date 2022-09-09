@@ -75,6 +75,8 @@ public:
   virtual void set_data_to_host() = 0;
   // DOUBT:it maybe a bad idea to define this function
   virtual void operator=(shader_variable *pother) = 0;
+  virtual void* phead_data() = 0;
+  virtual u32 get_data_len() = 0;
 };
 
 template <typename T> class shader_variable_T : public shader_variable {
@@ -86,7 +88,13 @@ public:
     _pdata = new T[buff_len];
   }
   ~shader_variable_T() { delete[] _pdata; }
-
+  void* phead_data() {
+      return _pdata;
+  }
+  u32 get_data_len() {
+      return sizeof(T) * _buff_len;
+  }
+  
   void set_data_to_host() { _phost->set_location(_pdata); }
   // FIXME:how to convert an shader_variable of other type to a variable of
   // current type?
@@ -110,7 +118,6 @@ public:
       idx = 0;
     return _pdata[idx];
   }
-  T *get_data_head() { return _pdata; }
   void init_data(std::vector<T> data) {
     auto min_len = _buff_len > data.size() ? data.size() : _buff_len;
     for (u32 ix = 0; ix < min_len; ++ix) {
@@ -141,6 +148,12 @@ public:
       auto cd_other = static_cast<shader_variable_T<sampler_dumy> *>(pother);
       ivalue = (*cd_other).value();
     }
+  }
+  void* phead_data() {
+      return &ivalue;
+  }
+  u32 get_data_len() {
+      return 4;
   }
   int &value() { return ivalue; }
 };

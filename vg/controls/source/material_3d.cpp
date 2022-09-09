@@ -4,7 +4,7 @@
 #include "material_3d.h"
 #include "transform.h"
 #include "material_container.h"
-#include "primitive_container.h"
+#include "vertex_container.h"
 namespace vg {
     using namespace std;
 material_3d::material_3d() {
@@ -13,7 +13,7 @@ material_3d::material_3d() {
   strcpy(_pt._uf_proj_name, "projection");
   _pt._cam = {{-400, 400, 0}, {-400, 400, 0}, {0, 1, 0}};
   _pt._pj = {20, 10, 10000};
-  _pt._primitive_name[0] = '\0';
+  _pt._vertex_name[0] = '\0';
   _pt._material_name[0] = '\0';
 
 }
@@ -33,8 +33,8 @@ void material_3d::link() {
     imatch++;
   }
 
-  auto iprm = primitive::_mp_primitive_units.find(_pt._primitive_name);
-  if (iprm != primitive::_mp_primitive_units.end()) {
+  auto iprm = vertex::_mp_vertex_units.find(_pt._vertex_name);
+  if (iprm != vertex::_mp_vertex_units.end()) {
     _ps_prm = iprm->second;
     if (_pt._with_feedback) {
       glBindBuffer(GL_ARRAY_BUFFER, _ps_prm->_vbo);

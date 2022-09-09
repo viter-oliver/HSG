@@ -1,7 +1,7 @@
 #pragma once
 #include "control_fac.h"
 #include "material.h"
-#include "primitive.h"
+#include "vertex.h"
 namespace vg
 {
 	class AFG_EXPORT material_3d :
@@ -10,7 +10,7 @@ namespace vg
 
 		DEF_STRUCT_WITH_INIT(intl_pt, _pt,
 			(int, _draw_mode, {en_gl_triangles}),
-			(char, _primitive_name[FILE_NAME_LEN]),
+			(char, _vertex_name[FILE_NAME_LEN]),
 			(char, _material_name[FILE_NAME_LEN]),
 			(char, _uf_model_name[FILE_NAME_LEN]),
 			(char, _uf_view_name[FILE_NAME_LEN]),
@@ -20,7 +20,7 @@ namespace vg
 		  (bool, _with_feedback, {false}))
 		bool _matched{ false };
     bool _same_sclae { false };
-		primitive::sd_primitive_unit _ps_prm;
+		vertex::sd_vertex_unit _ps_prm;
 		shader::sd_material _ps_mtl;
 		u32 _gpu_outbuff = { 0 };
 		std::vector<float> _output_buff;

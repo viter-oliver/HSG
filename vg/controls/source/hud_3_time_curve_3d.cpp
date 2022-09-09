@@ -65,10 +65,10 @@ void main()
 namespace vg
 {
     shader::sd_shader_base hud_3_time_curve_3d::_phud_sd = nullptr;
-    primitive::sd_primitive_unit hud_3_time_curve_3d::_ps_prm = nullptr;
+    vertex::sd_vertex_unit hud_3_time_curve_3d::_ps_prm = nullptr;
     using namespace std;
     using namespace shader;
-    using namespace primitive;
+    using namespace vertex;
      hud_3_time_curve_3d::hud_3_time_curve_3d()
      {
         _pt_tb._coeff_hac[ 0 ] = _pt_tb._coeff_hac[ 1 ] = _pt_tb._coeff_hac[ 2 ] = _pt_tb._coeff_hac[ 3 ] = 0.f;
@@ -91,7 +91,7 @@ namespace vg
               hud_3_time_curve_3d::_phud_sd->build_vs_code(hud_sd_4_curve_vs);
               hud_3_time_curve_3d::_phud_sd->build_fs_code(hud_sd_4_curve_fs);
               hud_3_time_curve_3d::_phud_sd->link();
-               hud_3_time_curve_3d::_ps_prm = make_shared<primitive_unit>();
+               hud_3_time_curve_3d::_ps_prm = make_shared<vertex_unit>();
                int demension = 5;
                auto data_cnt = point_cnt*demension;
                GLfloat* vertices = new GLfloat[ data_cnt ];

@@ -4,7 +4,7 @@
 #include <map>
 #include <memory>
 #include "packing_texture_container.h"
-#include "primitive_container.h"
+#include "vertex_container.h"
 namespace vg{
 namespace model{
 struct bounding_box

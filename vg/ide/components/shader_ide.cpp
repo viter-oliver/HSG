@@ -1,3 +1,4 @@
+#include "fstream"
 #include "shader_ide.h"
 #include "common_functions.h"
 #include "dir_output.h"
@@ -102,11 +103,13 @@ namespace shader {
         ImGui::EndChild();
     }
 }
+
 void create_item(shader::mp_sd_shader_ide& shader_list) {
     static char shader_name[FILE_NAME_LEN] = { 0 };
     static char vs_shader_name[FILE_NAME_LEN] = { 0 };
     static char fs_shader_name[FILE_NAME_LEN] = { 0 };
     static bool first_call = true;
+    static string vs_name, fs_name;
     if (first_call) {
         shader_name[0] = 0;
         vs_shader_name[0] = 0;
@@ -116,66 +119,23 @@ void create_item(shader::mp_sd_shader_ide& shader_list) {
     ImGui::InputText("Shader name:", shader_name, FILE_NAME_LEN);
     ImGui::InputText("Vertex shader file:", vs_shader_name, FILE_NAME_LEN);
     ImGui::SameLine();
-    if (ImGui::Button("...")) {
-        OPENFILENAME ofn = { sizeof(OPENFILENAME) };
-        ofn.hwndOwner = GetForegroundWindow();
-        // ofn.lpstrFilter = "ttf file:\0*.ttf\0\0";
-        char strFileName[MAX_PATH] = { 0 };
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFile = strFileName;
-        ofn.nMaxFile = sizeof(strFileName);
-        ofn.lpstrTitle = "Loading vertex shader file...";
-        ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
-        if (GetOpenFileName(&ofn)) {
-            string sd_dir_path = g_current_directory + shaders_fold;
-            string sd_file_path = strFileName;
-            string sd_src_file_name =
-                sd_file_path.substr(sd_file_path.find_last_of('\\') + 1);
-            string sd_test_full_name = sd_dir_path + sd_src_file_name;
-            getUniqueFileName(sd_test_full_name);
-            string str_cmd = "copy " + sd_file_path + " " + sd_test_full_name;
-            system(str_cmd.c_str());
-            string sd_file_name = sd_test_full_name.substr(sd_dir_path.size());
-            strcpy(vs_shader_name, sd_file_name.c_str());
-            vs_shader_name[sd_file_name.size()] = 0;
-
-            get_file_data(sd_test_full_name, [&](int file_sz) {
-                vs_code[file_sz] = 0;
-                return vs_code;
-                });
-        }
+    if (ImGui::Button("...##vscode")) {
+        vs_name.clear();
+        open_file_to_folder(vs_name, shaders_fold,
+            "Loading new vertex shader");
+        strcpy(vs_shader_name, vs_name.c_str());
+        vs_shader_name[vs_name.size()] = 0;
     }
 
     ImGui::InputText("Fragment shader file:", fs_shader_name, FILE_NAME_LEN);
     ImGui::SameLine();
-    if (ImGui::Button("Load fragment shader file...")) {
-        OPENFILENAME ofn = { sizeof(OPENFILENAME) };
-        ofn.hwndOwner = GetForegroundWindow();
-        // ofn.lpstrFilter = "ttf file:\0*.ttf\0\0";
-        char strFileName[MAX_PATH] = { 0 };
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFile = strFileName;
-        ofn.nMaxFile = sizeof(strFileName);
-        ofn.lpstrTitle = "Loading fragment file...";
-        ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
-        if (GetOpenFileName(&ofn)) {
-            string sd_dir_path = g_current_directory + shaders_fold;
-            string sd_file_path = strFileName;
-            string sd_src_file_name =
-                sd_file_path.substr(sd_file_path.find_last_of('\\') + 1);
-            string sd_test_full_name = sd_dir_path + sd_src_file_name;
-            getUniqueFileName(sd_test_full_name);
-            string str_cmd = "copy " + sd_file_path + " " + sd_test_full_name;
-            system(str_cmd.c_str());
-            string sd_file_name = sd_test_full_name.substr(sd_dir_path.size());
-            strcpy(fs_shader_name, sd_file_name.c_str());
-            fs_shader_name[sd_file_name.size()] = 0;
-            get_file_data(sd_test_full_name, [&](int file_sz) {
-                fs_code[file_sz] = 0;
-                return fs_code;
-                });
-        }
-}
+    if (ImGui::Button("...##fscode")) {
+        fs_name.clear();
+        open_file_to_folder(fs_name, shaders_fold,
+            "Loading new fragment shader");
+        strcpy(fs_shader_name, fs_name.c_str());
+        fs_shader_name[fs_name.size()] = 0;
+    }
     bool be_enabled = strlen(shader_name) > 0 && strlen(vs_shader_name) > 0 &&
         strlen(fs_shader_name) > 0;
     if (!be_enabled) {
@@ -191,26 +151,30 @@ void create_item(shader::mp_sd_shader_ide& shader_list) {
         string sd_dir_path = g_current_directory + shaders_fold;
         string vs_shader_file = sd_dir_path + vs_shader_name;
         if (!fileExist(vs_shader_file.c_str())) {
-            _vs_code = vs_default_code;
+            sd_shd_i->_vs_code = vs_default_code;
+            ofstream fout(vs_shader_file); // (file_full_path);
+            fout << sd_shd_i->_vs_code;
         }
         else {
             get_file_data(vs_shader_file, [&](int file_sz) {
-                _vs_code.resize(file_sz);
-                return const_cast<char*>(_vs_code.c_str());
+                sd_shd_i->_vs_code.resize(file_sz);
+                return const_cast<char*>(sd_shd_i->_vs_code.c_str());
                 });
         }
         string fs_shader_file = sd_dir_path + fs_shader_name;
         if (!fileExist(fs_shader_file.c_str())) {
-            _fs_code = fs_default_code;
+            sd_shd_i->_fs_code = fs_default_code;
+            ofstream fout(fs_shader_file);
+            fout << sd_shd_i->_fs_code;
         }
         else {
             get_file_data(vs_shader_file, [&](int file_sz) {
-                _fs_code.resize(file_sz);
-                return const_cast<char*>(_fs_code.c_str());
+                sd_shd_i->_fs_code.resize(file_sz);
+                return const_cast<char*>(sd_shd_i->_fs_code.c_str());
                 });
         }
-        _vs_name = vs_shader_name;
-        _fs_name = fs_shader_name;
+        sd_shd_i->_vs_name = vs_shader_name;
+        sd_shd_i->_fs_name = fs_shader_name;
         shader_list[shader_test_name] = sd_shd_i;
         first_call = true;
         ImGui::CloseCurrentPopup();
@@ -219,5 +183,10 @@ void create_item(shader::mp_sd_shader_ide& shader_list) {
         ImGui::PopItemFlag();
         ImGui::PopStyleVar();
     }
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel")) {
+        ImGui::CloseCurrentPopup();
+    }
+
 }
 } // namespace vg

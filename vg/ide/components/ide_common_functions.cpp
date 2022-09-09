@@ -4,9 +4,10 @@
 #include <ShlObj.h>
 #include <nlohmann/json.hpp>
 #include <windows.h>
+#include <iostream>
 namespace vg {
 using namespace std;
-using json = nlohman::json;
+using json = nlohmann::json;
 extern string g_current_directory;
 using namespace packing_texture;
 void open_file_to_folder(std::string &file_name, const char *folder,
@@ -35,7 +36,8 @@ void open_file_to_folder(std::string &file_name, const char *folder,
 void load_vector_texture_coordinate_ide_from_json(
     packing_texture::vtxt_coor_unit &vcoor, char *json_buff, int buff_len) {
   try {
-    json jdata_format = json::parse(json_buff, buff_len);
+      
+    json jdata_format = json::parse(json_buff);
     json frames = jdata_format["frames"];
     int isz = frames.size();
     for (int ix = 0; ix < isz; ++ix) {
@@ -57,9 +59,10 @@ void load_vector_texture_coordinate_ide_from_json(
       return;
     }
     for (auto &ju : frames.items()) {
-      auto &frame = ju.value["frame"];
+        auto& ju_value = ju.value();
+      auto &frame = ju_value["frame"];
       auto txt_coor_u = make_shared<sub_texture_coordinate_ide>();
-      txt_coor_u->filename = ju.value["filename"];
+      txt_coor_u->filename = ju_value["filename"];
       bool rotated = frame["rotated"];
       txt_coor_u->_x0 = frame["x"];
       txt_coor_u->_y0 = frame["y"];
@@ -72,7 +75,7 @@ void load_vector_texture_coordinate_ide_from_json(
       vcoor.emplace_back(txt_coor_u);
     }
 
-  } catch (json::exeception &e) {
+  } catch (json::exception &e) {
     std::cerr << e.what() << '\n';
   }
 }

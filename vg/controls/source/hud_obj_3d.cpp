@@ -63,7 +63,7 @@ namespace vg
           if( !hud_obj_3d::_phud_sd )
           {
                hud_obj_3d::_phud_sd = make_shared<vg_shader>( hud_sd_vs, hud_sd_fs );
-               hud_obj_3d::_ps_prm = make_shared<primitive_object>();
+               hud_obj_3d::_ps_prm = make_shared<vertex_object>();
                _ps_prm->set_ele_format( { 3, 2 } );
                _ps_prm->load_vertex_data( vertices, sizeof( vertices ) / sizeof( float ) );
           }

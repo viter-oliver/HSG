@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "modeling_3d.h"
 #include "model.h"
-#include "primitive_container.h"
+#include "vertex_container.h"
 #include "transform.h"
 #include "shader_source_code.h"
 namespace vg

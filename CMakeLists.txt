@@ -14,7 +14,7 @@ include_directories(${HSG_SOURCE_DIR}
 )
 if(HSG_IDE)
   add_compile_definitions(WITHIN_IDE)
-  set(ASSIMP_BUILD_TESTS CACHE OFF FORCE)
+  set(ASSIMP_BUILD_TESTS CACHE OFF FORCE) 
   set(ASSIMP_INSTALL CACHE OFF FORCE)
   include_directories(
     ${HSG_SOURCE_DIR}/assimp-5.2.4/include

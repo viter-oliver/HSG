@@ -111,7 +111,7 @@ void loadMaterialTextures(aiMaterial *mat, aiTextureType type, vector<string>& t
 		//add_image_to_mtexure_list(str_txt_path);
 	}
 }
-void processMesh(aiMesh *mesh, const aiScene *scene, primitive_object& obj_pm, vg_mesh& mesh_unit)
+void processMesh(aiMesh *mesh, const aiScene *scene, vertex_object& obj_pm, vg_mesh& mesh_unit)
 {
 	// data to fill
 
@@ -256,16 +256,16 @@ void processNode(aiNode *node, const aiScene *scene, vg_model& md, string& mesh_
 		// the node object only contains indices to index the actual objects in the scene. 
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		auto pmtv = make_shared<primitive_object>();
+		auto pmtv = make_shared<vertex_object>();
 
 		//meshes.push_back(processMesh(mesh, scene));
 		auto id = md.size();
 		char cc[50];
 		itoa(id, cc, 10);
 		string mesh_name = mesh_base_name + cc;
-		string mesh_kname = find_a_key_from_mp(g_primitive_list, mesh_name);
+		string mesh_kname = find_a_key_from_mp(g_vertex_list, mesh_name);
 		mesh_kname = find_a_key_from_mp(g_dic_file_chunk, mesh_kname);
-		g_primitive_list[mesh_kname] = pmtv;
+		g_vertex_list[mesh_kname] = pmtv;
 		md.emplace_back();
 		auto& cmesh = md[id];
 		cmesh._prm_id = mesh_kname;

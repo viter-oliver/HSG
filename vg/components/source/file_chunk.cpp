@@ -5,6 +5,11 @@ file_chunk_unit::file_chunk_unit(u32 fsize) : _fsize(fsize) {
   _pbin = malloc(fsize);
 }
 void file_chunk_unit::re_alloc(u32 fsize) {
+  if(!_pbin){
+    _pbin=malloc(fsize);
+    _fsize=fsize;
+    return;
+  }
   auto rt = realloc(_pbin, fsize);
   if (rt) {
     _fsize = fsize;

@@ -1,6 +1,6 @@
 #pragma once
 #include "control_common_def.h"
-#include "vg_primitive_object.h"
+#include "vg_vertex_object.h"
 
 #ifdef _GLFW_WAYLAND
 #include "../../deps/glad/glad.h"
@@ -40,6 +40,6 @@ public:
      bool load_ui_component_from_file(control_common_def& insert_node, char* file_path );
 private:
 
-	ps_primrive_object load_primitive_from_file(string &kname, vector<GLubyte> ele_format, GLuint vbo_len, GLuint ebo_len);
+	ps_primrive_object load_vertex_from_file(string &kname, vector<GLubyte> ele_format, GLuint vbo_len, GLuint ebo_len);
 };
 

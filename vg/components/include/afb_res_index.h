@@ -11,7 +11,7 @@ enum afb_res_index
 	en_mfiles_res,
 	en_shaders_res,
 	en_materials_res,
-	en_primitives_res,
+	en_vertexs_res,
 	en_models_res,
 	en_control_res,
 	en_aliase_dic,

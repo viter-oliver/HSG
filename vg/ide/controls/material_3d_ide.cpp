@@ -6,9 +6,9 @@ void material_3d::ex_init_fun() {
   reg_property_handle(&_pt, &_pt._draw_mode, [this]() {
     ImGui::Combo("Draw mode:", &_pt._draw_mode, draw_mode, en_gl_count);
   });
-  reg_property_handle(&_pt, _pt._primitive_name, [this]() {
+  reg_property_handle(&_pt, _pt._vertex_name, [this]() {
     if (_ps_prm) {
-      ImGui::Text("Primitive object:%s", _pt._primitive_name);
+      ImGui::Text("Primitive object:%s", _pt._vertex_name);
       ImGui::SameLine();
       if (ImGui::Button("Delink##prm_obj")) {
         _ps_prm = nullptr;
@@ -19,10 +19,10 @@ void material_3d::ex_init_fun() {
         }
       }
     } else {
-      ImGui::InputText("Primitive object:", _pt._primitive_name, FILE_NAME_LEN);
+      ImGui::InputText("Primitive object:", _pt._vertex_name, FILE_NAME_LEN);
       if (ImGui::Button("Link##prm")) {
-        auto &iprm = g_primitive_list.find(_pt._primitive_name);
-        if (iprm != g_primitive_list.end()) {
+        auto &iprm = g_vertex_list.find(_pt._vertex_name);
+        if (iprm != g_vertex_list.end()) {
           // sscanf()
 
           _ps_prm = iprm->second;
@@ -49,9 +49,9 @@ void material_3d::ex_init_fun() {
             glBufferData(GL_ARRAY_BUFFER, buff_sz, nullptr, GL_STATIC_READ);
           }
         } else {
-          string str_prm_nm(_pt._primitive_name);
-          if (ref_a_intenal_primitive(str_prm_nm)) {
-            _ps_prm = g_primitive_list[str_prm_nm];
+          string str_prm_nm(_pt._vertex_name);
+          if (ref_a_intenal_vertex(str_prm_nm)) {
+            _ps_prm = g_vertex_list[str_prm_nm];
           }
         }
       }
@@ -96,7 +96,7 @@ void material_3d::ex_init_fun() {
       }
     }
     if (!_matched) {
-      ImGui::Text("material is unmatched to primitive object");
+      ImGui::Text("material is unmatched to vertex object");
     }
   });
 

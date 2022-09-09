@@ -2,7 +2,7 @@
 #include "control_fac.h"
 #include "shader.h"
 #include "vg_texture.h"
-#include "primitive.h"
+#include "vertex.h"
 
 namespace vg
 {
@@ -18,7 +18,7 @@ namespace vg
                                 ( float, _tanslation_y, { 0.f } ),
                                 ( float, _tanslation_z, { 0.f } ) )
           static shader::sd_shader_base _phud_sd;
-          static primitive::sd_primitive_unit _ps_prm;
+          static vertex::sd_vertex_unit _ps_prm;
      public:
           hud_3_time_curve_3d();
           ~hud_3_time_curve_3d();

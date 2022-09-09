@@ -64,18 +64,17 @@ bool prepareFBO1(GLuint &colorTextId, GLuint &depthStencilTextId, GLuint &fboId,
   GLint last_fmid;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING, &last_fmid);
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-  // ���� ���� color attachment
+  // color attachment
   colorTextId = TextureHelper::makeAttachmentTexture(
       0, GL_RGBA, frame_width, frame_height, GL_RGBA, GL_UNSIGNED_BYTE);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          colorTextId, 0);
-  // ���� depth stencil texture attachment
+  // epth stencil texture attachment
   depthStencilTextId = TextureHelper::makeAttachmentTexture(
       0, GL_DEPTH24_STENCIL8, frame_width, frame_height, GL_DEPTH_STENCIL,
       GL_UNSIGNED_INT_24_8);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                          GL_TEXTURE_2D, depthStencilTextId, 0);
-  // ���������
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
     GLenum err_code = glGetError();
     printf("%s::%d glerror:%d\n", __FUNCTION__, __LINE__, err_code);
@@ -91,7 +90,7 @@ bool cp_prepareFBO1(GLuint &colorTextId, GLuint &depthStencilTextId,
   glGetIntegerv(GL_FRAMEBUFFER_BINDING, &last_fmid);
 
   glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-  // ���� ���� color attachment
+  // color attachment
   glGenTextures(1, &colorTextId);
   glBindTexture(GL_TEXTURE_2D, colorTextId);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, frame_width,
@@ -214,7 +213,7 @@ bool createDirectory(const char *pathName) {
 }
 
 void getUniqueFileName(std::string &file_full_name) {
-	while (fileExist(file_full_name))
+	while (fileExist(file_full_name.c_str()))
 	{
 		file_full_name+="_";
 	}

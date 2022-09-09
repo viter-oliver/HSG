@@ -18,7 +18,7 @@
 #include "Resource.h"
 #include "afb_load.h"
 #include "cp_state_manager.h"
-#include "cp_primitive_object.h"
+#include "cp_vertex_object.h"
 #include <chrono>
 //extern void instantiating_internal_shader();
 static void error_callback(int error, const char* description)

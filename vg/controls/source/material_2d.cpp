@@ -2,7 +2,7 @@
 #include "material_container.h"
 namespace vg {
 material_2d::material_2d() {
-  _pt._primitive_name[0] = '\0';
+  _pt._vertex_name[0] = '\0';
   _pt._material_name[0] = '\0';
 }
 void material_2d::link() {
@@ -13,8 +13,8 @@ void material_2d::link() {
     imatch++;
   }
 
-  auto iprm = g_primitive_list.find(_pt._primitive_name);
-  if (iprm != g_primitive_list.end()) {
+  auto iprm = g_vertex_list.find(_pt._vertex_name);
+  if (iprm != g_vertex_list.end()) {
     _ps_prm = iprm->second;
     imatch++;
   }

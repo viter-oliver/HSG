@@ -1,7 +1,7 @@
 #pragma once
 #include "control_fac.h"
 #include "material.h"
-#include "primitive.h"
+#include "vertex.h"
 namespace vg
 {
 	class AFG_EXPORT cube_3d :
@@ -13,8 +13,8 @@ namespace vg
 			(vec3, _rotation_srd))
 		/** referencing the color material */
 		shader::sd_material _pmaterial;
-		/** referencing the cube primitive object */
-		primitive::sd_primitive_unit _pcube_prim;
+		/** referencing the cube vertex object */
+		vertex::sd_vertex_unit _pcube_prim;
 	public:
 		cube_3d();
 		~cube_3d();
