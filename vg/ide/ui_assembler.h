@@ -1,5 +1,5 @@
 #pragma once
-#include "control_common_def.h"
+#include "control_fac.h"
 #include "vg_vertex_object.h"
 
 #ifdef _GLFW_WAYLAND

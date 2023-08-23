@@ -36,14 +36,14 @@ void init_controls_res_constrained()
                                              { return g_mmodel_list.size() > 0; });
      factory::get().register_res_constrained("ctl_textblock", [&]()
                                              {
-		auto& ctl_nm_list = g_pfont_face_manager->get_dic_fonts();
+		auto& ctl_nm_list = font_manager::get_dic_fonts();
 		return ctl_nm_list.size() > 0; });
      factory::get().register_res_constrained("ctl_image_play", [&]()
                                              { return g_dic_indep_texture.size() > 0 && g_dic_file_chunk.size() > 0; });
 }
 void clear_pre_proj_resource()
 {
-     auto &ctl_nm_list = g_pfont_face_manager->get_dic_fonts();
+     auto &ctl_nm_list = font_manager::get_dic_fonts();
      ctl_nm_list.clear();
      g_output_bin_format = {en_uncompressed_txt, en_shader_code};
      g_vpacking_texture.clear();
@@ -128,7 +128,7 @@ bool ui_assembler::load_vg_from_file(const char *file_path)
                          string font_name = jfont["name"].asString();
                          string font_full_name = str_font_path + font_name;
                          int tmp_id;
-                         auto ctl_u = g_pfont_face_manager->load_font(font_name, font_full_name, tmp_id);
+                         auto ctl_u = font_manager::load_font(font_name, font_full_name, tmp_id);
                          if (ctl_u)
                          {
                               ctl_u->_name = font_name;
@@ -666,8 +666,8 @@ bool ui_assembler::output_ui_component_to_file(const char *file_path)
           jroot["window_show"] = window_show;
           jroot["afb_output_path"] = g_afb_output_path;
           Value fonts(arrayValue);
-          // vfont_face_name& ctl_nm_list = g_pfont_face_manager->get_font_name_list();
-          auto &dic_fonts = g_pfont_face_manager->get_dic_fonts();
+          // vfont_face_name& ctl_nm_list = font_manager::get_font_name_list();
+          auto &dic_fonts = font_manager::get_dic_fonts();
           for (auto &font_item : dic_fonts)
           {
                Value jfont(objectValue);
@@ -1134,7 +1134,7 @@ bool ui_assembler::load_ui_component_from_file(control_common_def &insert_node, 
           Value jroot;
           if (reader.parse(fin, jroot, false))
           {
-               auto &ctl_nm_list = g_pfont_face_manager->get_dic_fonts();
+               auto &ctl_nm_list = font_manager::get_dic_fonts();
                auto ctl_sz = ctl_nm_list.size();
                string str_cmd;
                dic_id dic_font;
@@ -1150,7 +1150,7 @@ bool ui_assembler::load_ui_component_from_file(control_common_def &insert_node, 
                          string font_name = jfont["name"].asString();
                          string font_full_name = str_font_path + font_name;
                          int new_font_id;
-                         auto ctl_u = g_pfont_face_manager->load_font(font_name, font_full_name, new_font_id);
+                         auto ctl_u = font_manager::load_font(font_name, font_full_name, new_font_id);
                          if (ctl_u)
                          {
                               dic_font[ix] = new_font_id;
@@ -1941,7 +1941,7 @@ ps_primrive_object ui_assembler::load_primitive_from_file(string &kname, vector<
           return nullptr;
      }
 
-     ps_primrive_object ppbj = make_shared<primitive_object>();
+     ps_primrive_object ppbj = make_shared<vertex>();
      ppbj->set_ele_format(ele_format);
      ppbj->load_vertex_data(pvbo, vbo_len, pebo, ebo_len);
      ppbj->_ps_file = ifile->second;

@@ -12,16 +12,27 @@
 #include "../../deps/glad/glad.h"
 #endif
 #include <GLFW/glfw3.h>
+#include <functional>
+
 #include "SOIL.h"
 #include "texture.h"
-#include "ft_base.h"
+
 #include "ui_assembler.h"
-#include "res_output.h"
-#include "ft_image.h"
+
+#include "file_chunk_container.h"
+#include "shader_container.h"
+#include "material_container.h"
+#include "packing_texture_container.h"
+#include "vertex_container.h"
+#include "resource_manager.h"
+using namespace vg;
+
+#include "packing_texture_container.h"
+#include "image.h"
 #include "project_edit.h"
 #include "res_internal.h"
 #include "texture_res_load.h"
-#include <functional>
+
 #if defined(_GLFW_WIN32)
 #include <windows.h>
 #include <Shlwapi.h>
@@ -34,14 +45,15 @@
 #endif
 #include "Resource.h"
 #include "res_edit.h"
-#include "afb_output.h"
-#include "af_font_res_set.h"
-#include "af_primitive_object.h"
-#include "af_model.h"
-#include "material_shader_edit.h"
-#include "texture_edit.h"
-#include "fonts_edit.h"
-#include "file_res_edit.h"
+#include "hsb_output.h"
+#include "hsb_font_res_set.h"
+#include "vertex.h"
+#include "model.h"
+#include "material_container.h"
+#include "shader_container.h"
+#include "packing_texture_container.h"
+#include "font_manager.h"
+#include "file_chunk_container.h"
 #include "model_edit.h"
 #include "bind_edit.h"
 #include "aliase_edit.h"
@@ -49,8 +61,7 @@
 #include "base_prp_type_edit.h"
 #include "playlist_group_edit.h"
 #include "slider_path_picker.h"
-#include "primitve_edit.h"
-#include "feedback_edit.h"
+#include "vertex_container.h"
 #include "common_functions.h"
 #include "dir_output.h"
 #include "command_element_delta.h"
@@ -113,11 +124,10 @@ enum en_short_cut_item
 };
 function<void(en_short_cut_item)> fun_shortct;
 bool show_project_window = true, show_edit_window = true,
-     show_property_window = true, show_texture_res_manager = true, show_shader_material_manager = false,
-     show_fonts_manager = true, show_file_manager = true,
+     show_property_window = true,   show_fonts_manager = true, 
      show_output_format = false, show_model_list = false, show_world_space = false,
      show_bind_edit = false, show_state_manager_edit = false, show_aliase_edit = false,
-     show_slider_path_picker = false, show_prm_edit = false, show_video_dev_mg = false,
+     show_slider_path_picker = false, show_video_dev_mg = false,
      show_common_value_edit = false, show_feedback_edit = false, show_playlist_group = false;
 bool show_outline = false;
 bool show_project_file_strategy = false;
@@ -710,6 +720,12 @@ int main(int argc, char *argv[])
           }
      };
      /*boost::*/ thread td_backup;
+
+     auto mg_file=make_shared<res_manager<file_chunk_def,false>>(_mp_file_chunk,"Files");
+     auto mg_shader=make_shared<res_manager<shader_def,false>>(_mp_sd_shder_def,"Shader");
+     auto mg_materil=make_shared<res_manager<materil_def,false>>(_mp_sd_materials,"Materil");
+     auto mg_packing_texture=make_shared<res_manager<packing_texture_def>>(_v_sd_packing_texture,"Texture");
+     auto mg_vertex=make_shared<res_manager<vertex_def,false>>(_mp_vertex_base_units,"Vertex");
      // Main loop
      while (!glfwWindowShouldClose(window))
      {
@@ -951,7 +967,6 @@ int main(int argc, char *argv[])
                     prj_edit->add_sibling();
                }
           }
-
           if (ImGui::BeginMainMenuBar())
           {
                if (ImGui::BeginMenu("File"))
@@ -1126,14 +1141,12 @@ int main(int argc, char *argv[])
                     {
                          show_outline = !show_outline;
                     }
-                    if (ImGui::MenuItem("Texture Resource Manager", NULL, show_texture_res_manager))
-                    {
-                         show_texture_res_manager = !show_texture_res_manager;
-                    }
-                    if (ImGui::MenuItem("Shader&Material Manager", NULL, show_shader_material_manager))
-                    {
-                         show_shader_material_manager = !show_shader_material_manager;
-                    }
+                    mg_file->menu_switch();
+                    mg_shader->menu_switch();
+                    mg_materil->menu_switch();
+                    mg_packing_texture->menu_switch();
+                    mg_vertex->menu_switch();
+
                     if (ImGui::MenuItem("Fonts Manager", NULL, show_fonts_manager))
                     {
                          show_fonts_manager = !show_fonts_manager;
@@ -1142,10 +1155,7 @@ int main(int argc, char *argv[])
                     {
                          show_file_manager = !show_file_manager;
                     }
-                    if (ImGui::MenuItem("Models Manager", NULL, show_model_list))
-                    {
-                         show_model_list = !show_model_list;
-                    }
+                    
                     if (ImGui::MenuItem("World space", NULL, show_world_space))
                     {
                          show_world_space = !show_world_space;
@@ -1173,10 +1183,6 @@ int main(int argc, char *argv[])
                     if (ImGui::MenuItem("Slider path pick", NULL, show_slider_path_picker))
                     {
                          show_slider_path_picker = !show_slider_path_picker;
-                    }
-                    if (ImGui::MenuItem("Primitive objects", NULL, show_prm_edit))
-                    {
-                         show_prm_edit = !show_prm_edit;
                     }
                     if (ImGui::MenuItem("Feedback objects", NULL, show_feedback_edit))
                     {
@@ -1639,67 +1645,7 @@ int main(int argc, char *argv[])
 
                ImGui::End();
           }
-          if (show_prm_edit)
-          {
-               ImGui::Begin("Primitive objects", &show_prm_edit, ImVec2(600, 500));
-               ImGui::Columns(2);
-               ImGui::SetColumnWidth(0, 200);
-               g_primitive_edit.draw_primitive_list();
-               ImGui::NextColumn();
-               g_primitive_edit.draw_primitive_item_property();
-               ImGui::End();
-          }
-          if (show_texture_res_manager)
-          {
-               //ImGui::SetNextWindowBgAlpha(1.0f); // Transparent background
-               ImGui::Begin("Texture resources manager", &show_texture_res_manager, ImVec2(200, 500));
-               ImGui::BeginChild("Combined texture res list", ImVec2(1000, 220), true);
-               ImGui::Columns(2);
-               ImGui::Text("Spliced texture list:");
-               _pres_mg->draw_res_list();
-               ImGui::NextColumn();
-               _pres_mg->draw_res_item_property();
 
-               ImGui::NextColumn();
-               ImGui::Spacing();
-               ImGui::EndChild();
-               ImGui::BeginChild("Separated textures list", ImVec2(1000, 500), true);
-               ImGui::Columns(2);
-               ImGui::BeginChild("Separated_textures list", ImVec2(0, 0), true);
-               ImGui::Text("Separated texture list");
-               ptexture->draw_texture_list();
-               ImGui::EndChild();
-               ImGui::NextColumn();
-               ptexture->draw_texture_item_property();
-               ImGui::NextColumn();
-               ImGui::EndChild();
-               ImGui::End();
-          }
-          if (show_shader_material_manager)
-          {
-               ImGui::Begin("Shader&Material manager", &show_shader_material_manager);
-               ImGui::BeginChild("shaders", ImVec2(1000, 500), true);
-               //ImGui::Separator();
-               ImGui::Columns(2);
-               ImGui::Text("shaders:");
-               _pml_shd_mg->load_shader();
-               _pml_shd_mg->draw_shader();
-               ImGui::NextColumn();
-               _pml_shd_mg->load_shader_info();
-               _pml_shd_mg->draw_shader_item_property();
-               ImGui::NextColumn();
-               ImGui::EndChild();
-               ImGui::BeginChild("materials", ImVec2(1000, 500), true);
-               ImGui::Columns(2);
-               ImGui::Text("materials:");
-               _pml_shd_mg->draw_material();
-               ImGui::NextColumn();
-               _pml_shd_mg->draw_material_item_property();
-               ImGui::NextColumn();
-               //ImGui::Separator();
-               ImGui::EndChild();
-               ImGui::End();
-          }
           /**
           else
           {
@@ -1713,15 +1659,6 @@ int main(int argc, char *argv[])
                pfonts_edit->draw_fonts_list();
                ImGui::NextColumn();
                pfonts_edit->draw_font_item_pty();
-               ImGui::End();
-          }
-          if (show_file_manager)
-          {
-               ImGui::Begin("Files Manager", &show_file_manager);
-               ImGui::Columns(2);
-               pfiles_edit->draw_file_res_list();
-               ImGui::NextColumn();
-               pfiles_edit->draw_file_res_item_property();
                ImGui::End();
           }
           if (show_model_list)

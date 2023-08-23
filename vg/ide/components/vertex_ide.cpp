@@ -119,8 +119,7 @@ void vertex_ide::edit_item() {
    
 
     float* pvt=pvertex;
-    for (int ix = 0; ix < vertex_cnt; ix++)
-    {
+    for (int ix = 0; ix < vertex_cnt; ix++){
       stm_it.str(string());
       stm_it.clear();
       for(auto& fmt_u:_format){
@@ -130,7 +129,6 @@ void vertex_ide::edit_item() {
          ImGui::SameLine();
          pvt+=fmt_u;
       }
-     
       ImGui::Text("Vertex index:%d",ix);
     }
     ImGui::EndChild();
@@ -204,8 +202,8 @@ void create_item(mp_sd_vertex_ide &vertex_list) {
 		{
 			string prm_name(prm_name_str);
 			while(vertex_list.find(prm_name)!=vertex_list.end()){
-        prm_name+="_";
-      }
+                prm_name+="_";
+             }
 			auto pmtv = make_shared<vertex::vertex_ide>();
 			auto stride_ = pmtv->stride();
 			auto vlen = stride_ * vetex_cnt;

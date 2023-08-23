@@ -10,7 +10,7 @@ namespace vg {
 struct property_mem_range {
   void *phead_adree;
   int mem_len;
-  property_mem_range(void* phead, int len) :phead_adree(phead), mem_len(len) {}
+  property_mem_range(void *phead, int len) : phead_adree(phead), mem_len(len) {}
 };
 using v_property_mem_range = std::vector<property_mem_range>;
 const int name_len = 50;
@@ -20,9 +20,11 @@ using v_sd_control_def = std::vector<sd_control_def>;
 class AFG_EXPORT control_def {
 protected:
   vp_prop_ele _vprop_eles;
-  DEF_STRUCT_WITH_INIT(base_prop, _in_p, (vec2, _pos, {0.f}),
-                       (vec2, _size, {20.f}), (bool, _visible, {true}),
-                       (char, _name[name_len]))
+  DEF_STRUCT_WITH_INIT(base_prop, _in_p, 
+  (vec2, _pos, {0.f}),
+  (vec2, _size, {20.f}), 
+  (bool, _visible, {true}),
+  (char, _name[name_len]))
   v_sd_control_def _vchilds;
   /** the parent object, this member will NULL if current object is root */
   control_def *_parent = nullptr;
@@ -50,15 +52,15 @@ public:
   virtual void ex_init_fun() {}
   control_def() { ex_init_fun(); }
 
-  #define DECLARE_EX_INT
-  #define DECLARE_PROVIDE_DRAGGING_VALUE
-  #define DECLARE_DRAW_OUTLINE
-  #define DECLARE_DRAW_SEL_ANCHOR
+#define DECLARE_EX_INT
+#define DECLARE_PROVIDE_DRAGGING_VALUE
+#define DECLARE_DRAW_OUTLINE
+#define DECLARE_DRAW_SEL_ANCHOR
 
   virtual ~control_def() {}
   void collect_property_range(v_property_mem_range &vplist) {
     for (auto &prop_ele : _vprop_eles) {
-        vplist.emplace_back( prop_ele->_pro_address, prop_ele->_pro_sz );
+      vplist.emplace_back(prop_ele->_pro_address, prop_ele->_pro_sz);
     }
   }
   /*control_def *get_copy_of_object(){
@@ -66,7 +68,7 @@ public:
   }*/
   std::function<void(void)> _before_draw_handle = nullptr;
   std::function<void(void)> _after_draw_handle = nullptr;
-  void draw_frames(){
+  void draw_frames() {
     if (!visibility()) {
       return;
     }
@@ -81,9 +83,9 @@ public:
     if (_after_draw_handle) {
       _after_draw_handle();
     }
-  }  
+  }
   virtual void draw() {}
-  virtual void draw_outline(){}
+  virtual void draw_outline() {}
   vec2 &base_pos() { return _in_p._pos; }
   vec2 &size() { return _in_p._size; }
   bool &visibility() { return _in_p._visible; }
@@ -171,7 +173,7 @@ public:
   sd_control_def get_hit_obj(vec2 &tar_pos) {
     for (auto it = _vchilds.rbegin(); it != _vchilds.rend(); it++) {
       if ((*it)->visibility()) {
-        //DOUBT:could be better?
+        // DOUBT:could be better?
         auto hit_obj = (*it)->get_hit_obj(tar_pos);
         if (hit_obj) {
           return hit_obj;
@@ -184,25 +186,26 @@ public:
       return nullptr;
     }
   }
-  bool set_prop_fd_value(int pg_id, int fd_id, void *pvalue, u32 value_sz=-1) {
-    if (!pvalue){
-        vg_print("pvalue is 0");
-        return false;
+  bool set_prop_fd_value(int pg_id, int fd_id, void *pvalue,
+                         u32 value_sz = -1) {
+    if (!pvalue) {
+      vg_print("pvalue is 0");
+      return false;
     }
     auto pg_sz = _vprop_eles.size();
 
     if (pg_id >= pg_sz) {
-        vg_print("page id:% is ivalid", pg_id);
-        return false;
-    } 
+      vg_print("page id:% is ivalid", pg_id);
+      return false;
+    }
 
     auto &pg_ele = _vprop_eles[pg_id];
     auto &vfd_ele = pg_ele->_pro_page;
     auto vfd_ele_sz = vfd_ele.size();
     assert(fd_id < vfd_ele_sz && "invalid fd_id");
     if (fd_id >= vfd_ele_sz) {
-        vg_print("field id:%d is invalid", fd_id);
-        return false;
+      vg_print("field id:%d is invalid", fd_id);
+      return false;
     }
     auto &fd_ele = *vfd_ele[fd_id];
     char *pdest = fd_ele._address;

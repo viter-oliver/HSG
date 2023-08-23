@@ -2,11 +2,11 @@
 #include <boost/lexical_cast.hpp>
 #include "lua_interpreter.h"
 #include "lua.hpp"
-#include "af_type.h"
+#include "vg_type.h"
 
 static lua_State* L=nullptr;
 using namespace std;
-using namespace auto_future;
+using namespace vg;
 
 static class manager_lua
 {
@@ -58,8 +58,8 @@ namespace lua_interpreter{
 			} else if("char" == vr._type){
 				char* pcvalue=(char*)vr._value_addr;
 				lua_pushstring(L,pcvalue);
-			} else if("af_vi2" == vr._type){
-				af_vi2* pv2=(af_vi2*)vr._value_addr;
+			} else if("vi2" == vr._type){
+				vi2* pv2=(vi2*)vr._value_addr;
 				lua_newtable(L);
 				lua_pushstring(L,"x");
 				lua_pushinteger(L,pv2->x);
@@ -67,8 +67,8 @@ namespace lua_interpreter{
 				lua_pushstring(L,"y");
 				lua_pushinteger(L,pv2->y);
 				lua_settable(L,-3);
-			} else if("af_vi3" == vr._type){
-				af_vi3* pv3=(af_vi3*)vr._value_addr;
+			} else if("vi3" == vr._type){
+				vi3* pv3=(vi3*)vr._value_addr;
 				lua_newtable(L);
 				lua_pushstring(L,"x");
 				lua_pushinteger(L,pv3->x);
@@ -79,8 +79,8 @@ namespace lua_interpreter{
 				lua_pushstring(L,"z");
 				lua_pushinteger(L,pv3->z);
 				lua_settable(L,-3);
-			} else if("af_vi4" == vr._type){
-				af_vi4* pv4=(af_vi4*)vr._value_addr;
+			} else if("vi4" == vr._type){
+				vi4* pv4=(vi4*)vr._value_addr;
 				lua_newtable(L);
 				lua_pushstring(L,"x");
 				lua_pushinteger(L,pv4->x);
@@ -94,8 +94,8 @@ namespace lua_interpreter{
 				lua_pushstring(L,"w");
 				lua_pushinteger(L,pv4->w);
 				lua_settable(L,-3);
-			} else if("af_vec2" == vr._type){
-				af_vec2* pv2=(af_vec2*)vr._value_addr;
+			} else if("vec2" == vr._type){
+				vec2* pv2=(vec2*)vr._value_addr;
 				lua_newtable(L);
 				lua_pushstring(L,"x");
 				lua_pushnumber(L,pv2->x);
@@ -103,8 +103,8 @@ namespace lua_interpreter{
 				lua_pushstring(L,"y");
 				lua_pushnumber(L,pv2->y);
 				lua_settable(L,-3);
-			} else if("af_vec3" == vr._type){
-				af_vec3* pv3=(af_vec3*)vr._value_addr;
+			} else if("vec3" == vr._type){
+				vec3* pv3=(vec3*)vr._value_addr;
 				lua_newtable(L);
 				lua_pushstring(L,"x");
 				lua_pushnumber(L,pv3->x);
@@ -115,8 +115,8 @@ namespace lua_interpreter{
 				lua_pushstring(L,"z");
 				lua_pushnumber(L,pv3->z);
 				lua_settable(L,-3);
-			} else if("af_vec4" == vr._type){
-				af_vec4* pv4=(af_vec4*)vr._value_addr;
+			} else if("vec4" == vr._type){
+				vec4* pv4=(vec4*)vr._value_addr;
 				lua_newtable(L);
 				lua_pushstring(L,"x");
 				lua_pushnumber(L,pv4->x);
@@ -157,8 +157,8 @@ namespace lua_interpreter{
 			char* pcvalue=(char*)vr._value_addr;
 			const char* pscrc=lua_tostring(L,-1);
 			strcpy(pcvalue,pscrc);
-		} else if("af_vi2" == vr._type && lua_istable(L,-1)){
-			af_vi2* pv2=(af_vi2*)vr._value_addr;
+		} else if("vi2" == vr._type && lua_istable(L,-1)){
+			vi2* pv2=(vi2*)vr._value_addr;
 			lua_pushstring(L,"x");
 			lua_gettable(L,-2);
 			pv2->x=lua_tointeger(L,-1);
@@ -166,8 +166,8 @@ namespace lua_interpreter{
 			lua_pushstring(L,"y");
 			lua_gettable(L,-2);
 			pv2->y=lua_tointeger(L,-1);
-		} else if("af_vi3" == vr._type && lua_istable(L,-1)){
-			af_vi3* pv3=(af_vi3*)vr._value_addr;
+		} else if("vi3" == vr._type && lua_istable(L,-1)){
+			vi3* pv3=(vi3*)vr._value_addr;
 			lua_pushstring(L,"x");
 			lua_gettable(L,-2);
 			pv3->x=lua_tointeger(L,-1);
@@ -178,8 +178,8 @@ namespace lua_interpreter{
 			lua_pushstring(L,"z");
 			lua_gettable(L,-2);
 			pv3->z=lua_tointeger(L,-1);
-		} else if("af_vi4" == vr._type && lua_istable(L,-1)){
-			af_vi4* pv4=(af_vi4*)vr._value_addr;
+		} else if("vi4" == vr._type && lua_istable(L,-1)){
+			vi4* pv4=(vi4*)vr._value_addr;
 			lua_pushstring(L,"x");
 			lua_gettable(L,-2);
 			pv4->x=lua_tointeger(L,-1);
@@ -193,8 +193,8 @@ namespace lua_interpreter{
 			lua_pushstring(L,"w");
 			lua_gettable(L,-2);
 			pv4->w=lua_tointeger(L,-1);
-		} else if("af_vec2" == vr._type && lua_istable(L,-1)){
-			af_vec2* pv2=(af_vec2*)vr._value_addr;
+		} else if("vec2" == vr._type && lua_istable(L,-1)){
+			vec2* pv2=(vec2*)vr._value_addr;
 			lua_pushstring(L,"x");
 			lua_gettable(L,-2);
 			pv2->x=lua_tonumber(L,-1);
@@ -202,8 +202,8 @@ namespace lua_interpreter{
 			lua_pushstring(L,"y");
 			lua_gettable(L,-2);
 			pv2->y=lua_tonumber(L,-1);
-		} else if("af_vec3" == vr._type && lua_istable(L,-1)){
-			af_vec3* pv3=(af_vec3*)vr._value_addr;
+		} else if("vec3" == vr._type && lua_istable(L,-1)){
+			vec3* pv3=(vec3*)vr._value_addr;
 			lua_pushstring(L,"x");
 			lua_gettable(L,-2);
 			pv3->x=lua_tonumber(L,-1);
@@ -214,8 +214,8 @@ namespace lua_interpreter{
 			lua_pushstring(L,"z");
 			lua_gettable(L,-2);
 			pv3->z=lua_tonumber(L,-1);
-		} else if("af_vec4" == vr._type && lua_istable(L,-1)){
-			af_vec4* pv4=(af_vec4*)vr._value_addr;
+		} else if("vec4" == vr._type && lua_istable(L,-1)){
+			vec4* pv4=(vec4*)vr._value_addr;
 			lua_pushstring(L,"x");
 			lua_gettable(L,-2);
 			pv4->x=lua_tonumber(L,-1);

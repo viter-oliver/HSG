@@ -46,7 +46,7 @@ AFG_EXPORT bool play_tran(string stm_name, int from, int to,
     return false;
   }
   stm._pcur_tran = itran->second;
-  stm._trans_start = st_clock::now();
+  stm._trans_start = steady_clock::now();
   stm._play_state = en_play_tran;
   stm._cur_from = from;
   stm._cur_to = to;
@@ -61,9 +61,9 @@ AFG_EXPORT bool play_tran(string stm_name, int from, int to,
       field_ele &fel = p_pos._pobj->get_filed_ele(pgidx, fidx);
       auto &pp_block = cur_pp_value[iidx];
       char *ppt_addr = fel._address;
-      int tp_sz = fel._tpsz;
-      pp_block.resize(tp_sz);
-      memcpy(ppt_addr, &pp_block[0], tp_sz);
+      int bk_sz = fel._tpsz*fel._count;
+      pp_block.resize(bk_sz);
+      memcpy(ppt_addr, &pp_block[0], bk_sz);
       iidx++;
     }
   }
@@ -88,13 +88,13 @@ AFG_EXPORT bool play_tran_playlist(string stm_name, int playlist_id) {
   }
   stm._cur_playlist_id = playlist_id;
   stm._play_state = en_play_tran_playlist;
-  stm._trans_start = st_clock::now();
+  stm._trans_start = steady_clock::now();
   stm._cur_play_trans_id = 0;
   return true;
 }
 
 template <class T>
-void step_value(void *pfrom, void *pto, char *value_address, double scale) {
+void step_value(T *pfrom, T *pto, T *value_address, double scale) {
   auto sizeT = sizeof(T);
   T from, to, tprop;
   memcpy(&from, pfrom, sizeT);
@@ -115,7 +115,7 @@ void keep_state_trans_on() {
         continue;
       }
       assert(stm._cur_from != stm._cur_to && "invalid from or to");
-      auto cur_clk = st_clock::now();
+      auto cur_clk = steady_clock::now();
       auto &play_clk = stm._trans_start;
       auto dur_mills = duration_cast<milliseconds>(cur_clk - play_clk);
       auto &cur_trans = *stm._pcur_tran;
@@ -147,16 +147,84 @@ void keep_state_trans_on() {
           auto &ppt_blk_from = pp_vl_lst_from[idx];
           auto &ppt_blk_to = pp_vl_lst_to[idx];
           if (fel._type == "int") {
-            step_value<int>(&ppt_blk_from[0], &ppt_blk_to[0], ppt_addr,
-                            value_scale);
+            int *pfrom = (int *)&ppt_blk_from[0];
+            int *pto = (int *)&ppt_blk_to[0];
+            int *pvl = (int *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(pfrom, pto, pvl, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
           } else if (fel._type == "float") {
-            step_value<float>(&ppt_blk_from[0], &ppt_blk_to[0], ppt_addr,
-                              value_scale);
+            float *pfrom = (float *)&ppt_blk_from[0];
+            float *pto = (float *)&ppt_blk_to[0];
+            float *pvl = (float *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(pfrom, pto, pvl, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
           } else if (fel._type == "double") {
-            step_value<double>(&ppt_blk_from[0], &ppt_blk_to[0], ppt_addr,
-                               value_scale);
+            double *pfrom = (double *)&ppt_blk_from[0];
+            double *pto = (double *)&ppt_blk_to[0];
+            double *pvl = (double *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(pfrom, pto, pvl, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
           } else if (fel._type == "bool" && value_scale == 1.0) {
             ppt_addr[0] = ppt_blk_to[0];
+          } else if (fel._type == "vec2") {
+            vec2 *pfrom = (vec2 *)&ppt_blk_from[0];
+            vec2 *pto = (vec2 *)&ppt_blk_to[0];
+            vec2 *pvl = (vec2 *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(&pfrom->x, &pto->x, &pvl->x, value_scale);
+              step_value(&pfrom->y, &pto->y, &pvl->y, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
+          } else if (fel._type == "vec3") {
+            vec3 *pfrom = (vec3 *)&ppt_blk_from[0];
+            vec3 *pto = (vec3 *)&ppt_blk_to[0];
+            vec3 *pvl = (vec3 *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(&pfrom->x, &pto->x, &pvl->x, value_scale);
+              step_value(&pfrom->y, &pto->y, &pvl->y, value_scale);
+              step_value(&pfrom->z, &pto->z, &pvl->z, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
+          } else if (fel._type == "vec4") {
+            vec4 *pfrom = (vec4 *)&ppt_blk_from[0];
+            vec4 *pto = (vec4 *)&ppt_blk_to[0];
+            vec4 *pvl = (vec4 *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(&pfrom->x, &pto->x, &pvl->x, value_scale);
+              step_value(&pfrom->y, &pto->y, &pvl->y, value_scale);
+              step_value(&pfrom->z, &pto->z, &pvl->z, value_scale);
+              step_value(&pfrom->w, &pto->w, &pvl->w, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
+          } else if(fel._type=="vui2"){
+            vui2 *pfrom = (vui2 *)&ppt_blk_from[0];
+            vui2 *pto = (vui2 *)&ppt_blk_to[0];
+            vui2 *pvl = (vui2 *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(&pfrom->x, &pto->x, &pvl->x, value_scale);
+              step_value(&pfrom->y, &pto->y, &pvl->y, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
           }
           calcu_bind_node(prop);
           idx++;
@@ -210,16 +278,73 @@ void keep_state_trans_on() {
           auto &ppt_blk_from = pp_vl_lst_from[idx];
           auto &ppt_blk_to = pp_vl_lst_to[idx];
           if (fel._type == "int") {
-            step_value<int>(&ppt_blk_from[0], &ppt_blk_to[0], ppt_addr,
-                            value_scale);
+            int *pfrom = (int *)&ppt_blk_from[0];
+            int *pto = (int *)&ppt_blk_to[0];
+            int *pvl = (int *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(pfrom, pto, pvl, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
           } else if (fel._type == "float") {
-            step_value<float>(&ppt_blk_from[0], &ppt_blk_to[0], ppt_addr,
-                              value_scale);
+            float *pfrom = (float *)&ppt_blk_from[0];
+            float *pto = (float *)&ppt_blk_to[0];
+            float *pvl = (float *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(pfrom, pto, pvl, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
           } else if (fel._type == "double") {
-            step_value<double>(&ppt_blk_from[0], &ppt_blk_to[0], ppt_addr,
-                               value_scale);
+            double *pfrom = (double *)&ppt_blk_from[0];
+            double *pto = (double *)&ppt_blk_to[0];
+            double *pvl = (double *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(pfrom, pto, pvl, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
           } else if (fel._type == "bool" && value_scale == 1.0) {
             ppt_addr[0] = ppt_blk_to[0];
+          } else if (fel._type == "vec2") {
+            vec2 *pfrom = (vec2 *)&ppt_blk_from[0];
+            vec2 *pto = (vec2 *)&ppt_blk_to[0];
+            vec2 *pvl = (vec2 *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(&pfrom->x, &pto->x, &pvl->x, value_scale);
+              step_value(&pfrom->y, &pto->y, &pvl->y, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
+          } else if (fel._type == "vec3") {
+            vec3 *pfrom = (vec3 *)&ppt_blk_from[0];
+            vec3 *pto = (vec3 *)&ppt_blk_to[0];
+            vec3 *pvl = (vec3 *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(&pfrom->x, &pto->x, &pvl->x, value_scale);
+              step_value(&pfrom->y, &pto->y, &pvl->y, value_scale);
+              step_value(&pfrom->z, &pto->z, &pvl->z, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
+          } else if (fel._type == "vec4") {
+            vec4 *pfrom = (vec4 *)&ppt_blk_from[0];
+            vec4 *pto = (vec4 *)&ppt_blk_to[0];
+            vec4 *pvl = (vec4 *)ppt_addr;
+            for (int ix = 0; ix < fel._count; ix++) {
+              step_value(&pfrom->x, &pto->x, &pvl->x, value_scale);
+              step_value(&pfrom->y, &pto->y, &pvl->y, value_scale);
+              step_value(&pfrom->z, &pto->z, &pvl->z, value_scale);
+              step_value(&pfrom->w, &pto->w, &pvl->w, value_scale);
+              pfrom++;
+              pto++;
+              pvl++;
+            }
           }
           calcu_bind_node(prop);
           idx++;
@@ -257,7 +382,7 @@ AFG_EXPORT bool save_property_to_trans_state(string trans_name,
   auto &pp_vl_list_target = prp_value_list[base_id];
   auto &value_target = pp_vl_list_target[pos_id];
   // T tar_value;
-  memcpy(&value_target[0], fel._address, fel._tpsz);
+  memcpy(&value_target[0], fel._address, fel._tpsz*fel._count);
 
   return true;
 }
@@ -292,9 +417,9 @@ bool save_trans_value(string trans_name, int sid) {
     field_ele &fel = p_pos._pobj->get_filed_ele(pgidx, fidx);
     auto &pp_block = cur_pp_value[iidx];
     char *ppt_addr = fel._address;
-    int tp_sz = fel._tpsz;
-    pp_block.resize(tp_sz);
-    memcpy(&pp_block[0], ppt_addr, tp_sz);
+    int bk_sz = fel._tpsz*fel._count;
+    pp_block.resize(bk_sz);
+    memcpy(&pp_block[0], ppt_addr, bk_sz);
     iidx++;
   }
   return true;
@@ -319,9 +444,9 @@ AFG_EXPORT bool restore_trans_value(string trans_name, int sid) {
     field_ele &fel = p_pos._pobj->get_filed_ele(pgidx, fidx);
     auto &pp_block = cur_pp_value[iidx];
     char *ppt_addr = fel._address;
-    int tp_sz = fel._tpsz;
-    pp_block.resize(tp_sz);
-    memcpy(ppt_addr, &pp_block[0], tp_sz);
+    int bk_sz = fel._tpsz*fel._count;
+    pp_block.resize(bk_sz);
+    memcpy(ppt_addr, &pp_block[0], bk_sz);
     iidx++;
   }
   return true;

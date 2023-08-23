@@ -3,6 +3,7 @@ namespace vg{
   
 aliase_map g_aliase_dic;
 using namespace std;
+using namespace std::chrono;
 bool set_property_aliase_value(std::string prp_aliase_name, void* pvalue,u32 value_sz)
 {
   const auto& ialiase = g_aliase_dic.find(prp_aliase_name);
@@ -55,7 +56,7 @@ void execute_lazy_value()
           if (delta>lzvalue._during)
           {
                auto& alias_name = ilazy->first;
-               set_property_aliase_value( alias_name, &lzvalue._value[ 0 ] );
+               set_property_aliase_value( alias_name, &lzvalue._value[ 0 ], lzvalue._value.size());
                ilazy = g_lazy_value_buff.erase( ilazy );
           }
           else

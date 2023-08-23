@@ -11,6 +11,7 @@ include_directories(${HSG_SOURCE_DIR}
   ${HSG_SOURCE_DIR}/json-3.10.5/single_include
   ${HSG_SOURCE_DIR}/imgui
   ${HSG_SOURCE_DIR}/msgpack-c
+  ${HSG_SOURCE_DIR}/lua
 )
 if(HSG_IDE)
   add_compile_definitions(WITHIN_IDE)
@@ -37,10 +38,13 @@ if(GLFW_WINDOWS)
     include_directories(
       ${HSG_SOURCE_DIR}/gl3w
       ${HSG_SOURCE_DIR}/glfw3/win32/include
+      ${HSG_SOURCE_DIR}/imgui/examples/example_glfw_opengl3
       )
     add_subdirectory(gl3w)
   else()
-    include_directories(${HSG_SOURCE_DIR}/glfw3/include)
+    include_directories(${HSG_SOURCE_DIR}/glfw3/include
+    ${HSG_SOURCE_DIR}/imgui/examples/example_glfw_opengl_es
+    )
   endif()
   add_subdirectory(glfw3)
 endif()
@@ -49,4 +53,4 @@ add_subdirectory(soil)
 add_subdirectory(lua)
 
 add_subdirectory(imgui)
-add_subdirectory(vg)
+add_subdirectory(vg2)

@@ -1,6 +1,6 @@
 #include "screen_image_distortion.h"
 #include "common_functions.h"
-#include "res_output.h"
+#include "packing_texture_container.h"
 namespace vg
 {
 #if 1

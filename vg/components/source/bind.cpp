@@ -54,7 +54,7 @@ void calcu_prop_ele_pos_index(const prop_ele_position& pep, prop_ele_pos_index& 
   pep_id.emplace_back(pep._page_index);
   sd_control_def ppt = nullptr;
   sd_control_def pcur = pep._pobj;
-  while (ppt=make_shared<control_def>(pcur->get_parent()))
+  while (ppt= sd_control_def(pcur->get_parent()))
   {
     u16 idx = 0;
     size_t sz = ppt->child_count();

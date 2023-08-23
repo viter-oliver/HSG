@@ -12,6 +12,10 @@ namespace vg {
 
 font_txt_repository::~font_txt_repository() { glDeleteTextures(1, &_txt_id); }
 namespace font_manager {
+dic_fonts _dic_fonts;
+dic_fonts& get_dic_fonts(){
+  return _dic_fonts;
+}
 using namespace std;
 FT_Library _ft;
 struct  font_assist
@@ -61,12 +65,12 @@ void init_txt_font(u32 fontSize, font_txt_repository &newFrep) {
 void load_chars(FT_Face &fontFace, font_txt_repository &fp,
                 std::wstring &wchar_list) {
   dic_glyph_txt &container = fp._dic_txt_cd;
-  GLint &max_bearingy = fp._max_bearing;
+  GLint &max_bearingy = fp._max_bearingy;
   GLuint &txtid = fp._txt_id;
   assert(txtid &&
          "you must pass a valid texture id into the function load_chars!");
   vui2 &border = fp._border;
-  vi2 &txt_size = fp._txt_size;
+  vui2 &txt_size = fp._txt_size;
   GLuint &fontSize = fp._font_size;
   bool &be_full = fp._full;
 
@@ -76,7 +80,7 @@ void load_chars(FT_Face &fontFace, font_txt_repository &fp,
   for (auto &str_it : wchar_list) {
     auto &it_glyph = container.find(str_it);
     if (it_glyph != container.end()) {
-      auto &ch_glhph = it_glyph->second;
+      auto &ch_glhph = *it_glyph->second;
       auto &by = ch_glhph._bearing.y;
       if (by > max_bearingy) {
         max_bearingy = by;
@@ -130,7 +134,7 @@ void load_chars(FT_Face &fontFace, font_txt_repository &fp,
     // border.x += 5;
     delete[] prgba;
     auto sd_funit = make_shared<font_txt_coordinate>();
-    *sd_funit = {{tw, th}, {lt, tp}, ad, x0, y0, x1, y1};
+    *sd_funit = {{tw, th}, {lt, tp}, (u32)ad, x0, y0, x1, y1};
     container[str_it] = sd_funit;
     ;
   }
@@ -140,33 +144,26 @@ bool load_font(font_unit& ft, uint8_t *pfont_buff,
 
   FT_Error err = FT_New_Memory_Face(_ft, pfont_buff, file_size, 0, &ft._ft_face);
   if (err) {
-    printf("fail to load font from:%s!\n", fontFaceName.c_str());
+    printf("fail to load font bufffer!\n");
     return false;
   }
   FT_Select_Charmap(ft._ft_face, FT_ENCODING_UNICODE);
   return true;
 }
 bool load_font(font_unit& ft,string& fontPath){
-  if (FT_New_Face(_ft,fontPath.c_str(),&ft._ft_face)){
+  if (FT_New_Face(_ft,fontPath.c_str(),0,&ft._ft_face)){
     return false;
   } else {
     return true;
   }
 }
-  enum omit_type
-	{
-		en_no_omit,
-		en_omit_rest,
-		en_omit_rest_with_ellipsis,
-		en_omit_type_number
-	};
+
 int draw_wstring(ps_font_unit &pf_u, FT_Long fontSize, vec2 &start_pos,
                  vec2 &end_pos, float scale, std::wstring &str_content,
                  const vec4 &txt_col, float width, int omit_rest,
                  bool be_new) {
   font_txt_repository *pfrp = nullptr;
   GLint max_beary = 0;
-  // auto& ifont = _dic_fonts.find(fontFace);
   auto &f_u = *pf_u;
   const auto &irep = f_u._ft_rep.find(fontSize);
   if (irep != f_u._ft_rep.end()) {
@@ -180,7 +177,7 @@ int draw_wstring(ps_font_unit &pf_u, FT_Long fontSize, vec2 &start_pos,
   if (!pfrp->_full) {
     load_chars(f_u._ft_face, *pfrp, str_content);
   }
-  max_beary = pfrp->_max_bearing;
+  max_beary = pfrp->_max_bearingy;
   bool be_break = str_content[0] == L'O' && str_content[1] == L'S';
 
   end_pos = start_pos;
@@ -196,7 +193,7 @@ int draw_wstring(ps_font_unit &pf_u, FT_Long fontSize, vec2 &start_pos,
   for (auto &wstr_item : str_content) {
     const auto &glyph_txt_it = txt_cd_container.find(wstr_item);
     if (glyph_txt_it != txt_cd_container.end()) {
-      auto &glyph_txt_cd = glyph_txt_it->second;
+      auto &glyph_txt_cd = *glyph_txt_it->second;
       auto bearing = glyph_txt_cd._bearing;
       auto tsize = glyph_txt_cd._size;
       float x0 = glyph_txt_cd._x0;
@@ -212,10 +209,10 @@ int draw_wstring(ps_font_unit &pf_u, FT_Long fontSize, vec2 &start_pos,
         if (omit_rest != en_no_omit) {
           // if (cnt_char < cnt_char)
           {
-            wstring omit_sign = omit_rest == en_omit_rest ? L" " : L"…";
+            wstring omit_sign = omit_rest == en_omit_rest ? L" " : L"...";
             load_chars(pf_u->_ft_face, *pfrp, omit_sign);
             auto &glyph_omit = txt_cd_container.find(omit_sign[0]);
-            auto &glyph_omit_txt_cd = glyph_omit->second;
+            auto &glyph_omit_txt_cd = *glyph_omit->second;
             bearing = glyph_omit_txt_cd._bearing;
             tsize = glyph_omit_txt_cd._size;
             x0 = glyph_omit_txt_cd._x0;
@@ -284,7 +281,7 @@ int draw_wstring(ps_font_unit &pf_u, FT_Long fontSize, vec2 &start_pos,
     init_txt_font(fontSize, f_u._ft_rep[fontSize]);
     pfrp = &f_u._ft_rep[fontSize];
   }
-  if (!pfrp->_be_full) {
+  if (!pfrp->_full) {
     load_chars(f_u._ft_face, *pfrp, str_content);
   }
   max_beary = pfrp->_max_bearingy;
@@ -299,7 +296,7 @@ int draw_wstring(ps_font_unit &pf_u, FT_Long fontSize, vec2 &start_pos,
   for (auto &wstr_item : str_content) {
     const auto &glyph_txt_it = txt_cd_container.find(wstr_item);
     if (glyph_txt_it != txt_cd_container.end()) {
-      auto &glyph_txt_cd = glyph_txt_it->second;
+      auto &glyph_txt_cd = *glyph_txt_it->second;
       auto bearing = glyph_txt_cd._bearing;
       auto tsize = glyph_txt_cd._size;
       float x0 = glyph_txt_cd._x0;

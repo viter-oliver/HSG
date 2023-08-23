@@ -1,8 +1,12 @@
-#include "vg_type.h"
+#pragma once
 #include <string>
 #include <memory>
 #include <map>
 #include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "vg_type.h"
 namespace vg {
 namespace vertex {
 using attribute_format = std::vector<u8>;
@@ -15,7 +19,8 @@ struct bounding_box{
 struct vertex_unit {
   u32 _vao{0}, _vbo{0}, _ebo{0};
   // data below could be got by glGetBufferParameteriv(GL_ARRAY_BUFFER,
-  // GL_BUFFER_SIZE, &bufferSize); u32 _vertex_buf_len, _ele_buf_len;
+  // GL_BUFFER_SIZE, &bufferSize); 
+  u32 _vertex_buf_len, _ele_buf_len, _mem_usage;
   attribute_format _format;
   bounding_box _bounding_box; 
   ~vertex_unit();

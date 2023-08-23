@@ -4,9 +4,21 @@
 #include <memory>
 #include <type_traits>
 #include <stddef.h>
+#include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
+#include <boost/preprocessor/seq/for_each_i.hpp>
+#include <boost/preprocessor/seq/pop_front.hpp>
 #include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/variadic/to_seq.hpp>
+#include <boost/preprocessor/control/expr_if.hpp>
+#include <boost/preprocessor/logical/not.hpp>
+#include <boost/preprocessor/variadic/elem.hpp>
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/seq.hpp>
+#include <boost/preprocessor/stringize.hpp>
+#include <boost/preprocessor/arithmetic/inc.hpp>
+#include <boost/preprocessor/comparison/not_equal.hpp>
+#include <boost/preprocessor/repetition/for.hpp>
 enum range_value_type
 {
 	en_range_value_int,

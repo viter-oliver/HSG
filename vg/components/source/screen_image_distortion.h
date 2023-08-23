@@ -2,7 +2,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-#include "cp_shader.h"
+#include "shader.h"
 namespace vg
 {
 	class screen_image_distortion

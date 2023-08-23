@@ -11,12 +11,12 @@
 
 #include "SOIL.h"
 #include "texture.h"
-#include "res_output.h"
+#include "packing_texture_container.h"
 #include "ctl_image.h"
 #include <functional>
 
 #include "Resource.h"
-#include "afb_load.h"
+#include "hsb_load.h"
 #include "cp_state_manager.h"
 #include "cp_vertex_object.h"
 #include <chrono>
@@ -106,7 +106,7 @@ namespace vg
 		if (!_cureent_project_file_path.empty())
 		{
 			auto currentTime = std::chrono::high_resolution_clock::now();
-			afb_load afl(_proot);
+			hsb_load afl(_proot);
 			//std::bind(&play_back_node::btnclk_##x, this, std::placeholders::_1)
 			//afl.set_impl(std::bind(&application::init_ui_component, this, std::placeholders::_1));
 			afl.load_afb(_cureent_project_file_path.c_str());

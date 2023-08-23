@@ -13,11 +13,14 @@ namespace vg {
 #undef DECLARE_DRAW_OUTLINE
 #define DECLARE_DRAW_OUTLINE void draw_outline();
 
-#undef DECLARE_DRAW_SEL_ANCHOR 
+#undef DECLARE_DRAW_SEL_ANCHOR
 #define DECLARE_DRAW_SEL_ANCHOR virtual void draw_sel_anchor();
-const float edit_unit_len = 5.0f;
+
+bool edit_file_ele(field_ele &fele);
 class AFG_EXPORT control_def_ide : public control_def {
+
 protected:
+  const float edit_unit_len = 5.0f;
   struct st_member_key {
     void *_address;
     void *_field_address;
@@ -36,8 +39,8 @@ protected:
   mp_property_handle _unique_property_handles;
   void reg_property_handle(void *page_address, void *field_address,
                            property_handle phandle) {
-    _unique_property_handles[st_member_key(page_address,
-                                                     field_address)] = phandle;
+    _unique_property_handles[st_member_key(page_address, field_address)] =
+        phandle;
   }
 
 public:

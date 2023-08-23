@@ -9,6 +9,7 @@ using namespace std;
 using json=nlohmann::json;
 extern string g_current_directory;
 void file_chunk_ide::edit_item() { ImGui::Text("File size:%d", _fsize); }
+/*
 void file_chunk_ide::to_json(nlohmann::json &jTar) {
     jTar["name"]=_name;
     jTar["fsize"]=_fsize;
@@ -30,7 +31,7 @@ bool file_chunk_ide::from_json(nlohmann::json &jSrc) {
         return false;
     }
     
-}
+}*/
 void create_item(mp_sd_file_chunk_ide &file_chunk_list) {
   static string file_name;
   static bool first_call = true;

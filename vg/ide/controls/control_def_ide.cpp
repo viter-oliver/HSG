@@ -1,7 +1,7 @@
 #include "control_def_ide.h"
 #include "common_functions.h"
-#include "packing_texture_draw.h"
 #include "packing_texture_container.h"
+#include "packing_texture_draw.h"
 #include "user_control_imgui.h"
 #include <regex>
 namespace vg {
@@ -114,18 +114,167 @@ void ShowHelpMarker(const char *desc) {
     ImGui::EndTooltip();
   }
 }
+bool edit_file_ele(field_ele &fele) {
+  auto mtype = fele._type;
+  auto mname = fele._name;
+  auto mtpsz = fele._tpsz;
+  char *memb_address = fele._address;
+  int array_cnt = fele._count;
+  string rg = mname.substr(mname.length() - 3, 3);
+  auto &irg = s_rg_tips.find(rg);
+  value_range _vrange(-screenw, screenw);
+  if (irg != s_rg_tips.end()) {
+    _vrange = irg->second;
+  }
 
-void control_def_ide::ex_init_fun() {
-    reg_property_handle(&_in_p, &_in_p._size, [this]()
-    {
-        ImGui::SliderFloat("width:", &_in_p._size.x,1920.f,1920.f);
-        ImGui::SliderFloat("height:", &_in_p._size.y,720.f,720.f);
-    });
-    _after_draw_handle = [&]() {
-        if (_selected) {
-            draw_sel_anchor();
-        }
+  string float_format = "%.3f";
+  if (regex_search(mname, regex("_hac"))) {
+    float_format = "%.6f";
+  }
+
+  function<bool(string &, void *)> f_draw_index_prop;
+
+  if (mtype == "char") {
+    if (array_cnt > 0) {
+      ImGui::InputText(mname.c_str(), (char *)memb_address, array_cnt);
+    } else {
+      ImGui::SliderInt(mname.c_str(), (int *)memb_address, 0, 255);
+    }
+  } else if (mtype == "int") {
+    f_draw_index_prop = [&](string &str_show, void *maddress) {
+      return ImGui::SliderInt(str_show.c_str(), (int *)maddress,
+                              _vrange._min._i, _vrange._max._i);
     };
+  } else if (mtype == "float" || mtype == "double") {
+    f_draw_index_prop = [&](string &str_show, void *maddress) {
+      return ImGui::SliderFloat(str_show.c_str(), (float *)maddress,
+                                _vrange._min._f, _vrange._max._f,
+                                float_format.c_str());
+    };
+  } else if (mtype == "vui2") {
+    if (rg == "txt") // atexture
+    {
+      auto f_draw_index_prop = [&](string &str_show, void *maddress) {
+        using namespace packing_texture;
+        constexpr const float imge_edit_view_height_max = 500.f;
+        constexpr const float imge_edit_view_width_max =
+            imge_edit_view_height_max * 0.618f;
+        vui2 *ptxt_idx = (vui2 *)maddress;
+        vec2 img_sz;
+        int igsize = _v_sd_packing_texture.size();
+        if (ptxt_idx->x >= igsize || ptxt_idx->x < 0) {
+          ImGui::Text("Invalid texture!");
+          img_sz = {88, 81};
+        } else {
+          auto &ptxt_unit = _v_sd_packing_texture[ptxt_idx->x];
+          auto ptxt_unit_ide =
+              static_pointer_cast<sd_packing_texture_unit_ide>(ptxt_unit);
+          img_sz = {(float)(*ptxt_unit_ide)->_width,
+                    (float)(*ptxt_unit_ide)->_height};
+          ImGui::Text("Texture:%s", (*ptxt_unit_ide)->name.c_str());
+          auto &pvsub_unit = (*ptxt_unit_ide)->vtexture_coordinate;
+          if (ptxt_idx->y < pvsub_unit.size()) {
+            auto &psub_unit = pvsub_unit[ptxt_idx->y];
+            auto psub_unit_ide =
+                static_pointer_cast<sd_sub_texture_coordinate_ide>(psub_unit);
+            img_sz = {(*psub_unit_ide)->width(), (*psub_unit_ide)->height()};
+            ImGui::SameLine();
+            ImGui::Text("->%s", (*psub_unit_ide)->filename.c_str());
+          }
+        }
+        vec2 invalid_pos = {-1, 0};
+        vec4 tincol = {1, 1, 1, 1}, bordcol = {0, 0, 0, 0};
+        bool is_fat = img_sz.x > img_sz.y;
+        if (is_fat && img_sz.x > imge_edit_view_width_max) {
+          auto scale = img_sz.y / img_sz.x;
+          img_sz.x = imge_edit_view_width_max;
+          img_sz.y = imge_edit_view_width_max * scale;
+        } else if (!is_fat && img_sz.y > imge_edit_view_height_max) {
+          auto scale = img_sz.x / img_sz.y;
+          img_sz.y = imge_edit_view_height_max;
+          img_sz.x = imge_edit_view_height_max * scale;
+        }
+
+        packing_texture::draw_rect(*ptxt_idx, invalid_pos, img_sz, tincol,
+                                   bordcol);
+      };
+    } else {
+      f_draw_index_prop = [&](string &str_show, void *maddress) {
+        return ImGui::SliderInt2(str_show.c_str(), (int *)maddress,
+                                 _vrange._min._u, _vrange._max._u);
+      };
+    }
+  } else if (mtype == "vi3") {
+    f_draw_index_prop = [&](string &str_show, void *maddress) {
+      return ImGui::SliderInt3(str_show.c_str(), (int *)maddress,
+                               _vrange._min._i, _vrange._max._i);
+    };
+  } else if (mtype == "vi4") {
+    f_draw_index_prop = [&](string &str_show, void *maddress) {
+      return ImGui::SliderInt4(str_show.c_str(), (int *)maddress,
+                               _vrange._min._i, _vrange._max._i);
+    };
+  } else if (mtype == "vec2") {
+    f_draw_index_prop = [&](string &str_show, void *maddress) {
+      return ImGui::SliderFloat2(str_show.c_str(), (float *)maddress,
+                                 _vrange._min._f, _vrange._max._f,
+                                 float_format.c_str());
+    };
+  } else if (mtype == "vec3") {
+    f_draw_index_prop = [&](string &str_show, void *maddress) {
+      if (rg == "clr") {
+        return ImGui::ColorEdit3(str_show.c_str(), (float *)maddress,
+                                 ImGuiColorEditFlags_RGB);
+      } else {
+        return ImGui::SliderFloat3(str_show.c_str(), (float *)maddress,
+                                   _vrange._min._f, _vrange._max._f,
+                                   float_format.c_str());
+      }
+    };
+  } else if (mtype == "vec4") {
+    f_draw_index_prop = [&](string &str_show, void *maddress) {
+      if (rg == "clr") {
+        return ImGui::ColorEdit4(str_show.c_str(), (float *)maddress,
+                                 ImGuiColorEditFlags_RGB);
+      } else {
+        return ImGui::SliderFloat4(str_show.c_str(), (float *)maddress,
+                                   _vrange._min._f, _vrange._max._f,
+                                   float_format.c_str());
+      }
+    };
+  } else if (mtype == "bool") {
+    f_draw_index_prop = [&](string &str_show, void *maddress) {
+      return ImGui::Checkbox(str_show.c_str(), (bool *)maddress);
+    };
+  } else {
+    printf("unknown member type!:%s\n", mtype.c_str());
+    return false;
+  }
+  if (f_draw_index_prop) {
+    if (array_cnt > 0) {
+      for (int ix = 0; ix < array_cnt; ++ix) {
+        char str_index[50] = {0};
+        sprintf(str_index, "[%d]", ix);
+        string mname_width_index = mname + str_index;
+        void *memb_index_address = (char *)memb_address + ix * mtpsz;
+        f_draw_index_prop(mname_width_index, memb_index_address);
+      }
+    } else {
+      f_draw_index_prop(mname, memb_address);
+    }
+  }
+  return true;
+}
+void control_def_ide::ex_init_fun() {
+  reg_property_handle(&_in_p, &_in_p._size, [this]() {
+    ImGui::SliderFloat("width:", &_in_p._size.x, 1920.f, 1920.f);
+    ImGui::SliderFloat("height:", &_in_p._size.y, 720.f, 720.f);
+  });
+  _after_draw_handle = [&]() {
+    if (_selected) {
+      draw_sel_anchor();
+    }
+  };
 }
 void control_def_ide::provide_value(
     dragging_value_to_tar::ptr_dragging_value pdragging_value) {}
@@ -138,202 +287,29 @@ void control_def_ide::draw_propertys() {
     auto &prop_page = prop_ele->_pro_page;
     int idx = 0;
     for (auto &memb : prop_page) {
-      auto mtype = memb->_type;
-      auto mname = memb->_name;
-      auto mtpsz = memb->_tpsz;
-      char *memb_address = memb->_address;
-      int array_cnt = memb->_count;
-      /**string::size_type apos = mname.find('[');
-      if (apos != string::npos) // is array
-      {
-        mname = mname.substr(0, apos);
-      } else {
-        auto eppos = mname.find('=');
-        if (eppos != string::npos) {
-          mname = mname.substr(0, eppos);
-        } else {
-          auto brpos = mname.find('{');
-          if (brpos != string::npos) {
-            mname = mname.substr(0, brpos);
-          }
-        }
-      }*/
-      string rg = mname.substr(mname.length() - 3, 3);
-      auto &irg = s_rg_tips.find(rg);
-      value_range _vrange(-screenw, screenw);
-      if (irg != s_rg_tips.end()) {
-        _vrange = irg->second;
-      }
-
-      string float_format = "%.3f";
-      if (regex_search(mname, regex("_hac"))) {
-        float_format = "%.6f";
-      }
 
       auto &imemb_tp_handl =
-          _mcustom_type_property_handles_container.find(mtype);
+          _mcustom_type_property_handles_container.find(memb->_type);
       if (imemb_tp_handl != _mcustom_type_property_handles_container.end()) {
-        imemb_tp_handl->second(memb_address);
+        imemb_tp_handl->second(memb->_address);
       } else {
         auto &imemb_var_handle = _unique_property_handles.find(
             st_member_key(prop_ele->_pro_address, memb->_address));
         if (imemb_var_handle != _unique_property_handles.end()) {
           imemb_var_handle->second();
         } else {
-          function<bool(string &, void *)> f_draw_index_prop;
-
-          if (mtype == "char") {
-            if (array_cnt > 0) {
-              if (mname == "_name") {
-                if (ImGui::InputText("object name", _in_p._name, name_len)) {
-                  auto pparent = get_parent();
-                  if (pparent) {
-                    string nname =
-                        pparent->try_create_a_child_name(_in_p._name, make_shared<control_def_ide>(this));
-                    strcpy(_in_p._name, nname.c_str());
-                  }
-                }
-              } else {
-                ImGui::InputText(mname.c_str(), (char *)memb_address,
-                                 array_cnt);
-              }
-            } else
-              ImGui::SliderInt(mname.c_str(), (int *)memb_address, 0, 255);
-          } else if (mtype == "int") {
-            f_draw_index_prop = [&](string &str_show, void *maddress) {
-              return ImGui::SliderInt(str_show.c_str(), (int *)maddress,
-                                      _vrange._min._i, _vrange._max._i);
-            };
-          } else if (mtype == "float" || mtype == "double") {
-            f_draw_index_prop = [&](string &str_show, void *maddress) {
-              return ImGui::SliderFloat(str_show.c_str(), (float *)maddress,
-                                        _vrange._min._f, _vrange._max._f,
-                                        float_format.c_str());
-            };
-          } else if (mtype == "vui2") {
-            if (rg == "txt") // atexture
-            {
-              auto f_draw_index_prop = [&](string &str_show, void *maddress) {
-                using namespace packing_texture;
-                constexpr const float imge_edit_view_height_max = 500.f;
-                constexpr const float imge_edit_view_width_max =
-                    imge_edit_view_height_max * 0.618f;
-                vui2 *ptxt_idx = (vui2 *)maddress;
-                vec2 img_sz;
-                int igsize = _v_sd_packing_texture.size();
-                if (ptxt_idx->x >= igsize || ptxt_idx->x < 0) {
-                  ImGui::Text("Invalid texture!");
-                  img_sz = {88, 81};
-                } else {
-                  auto &ptxt_unit = _v_sd_packing_texture[ptxt_idx->x];
-                  auto ptxt_unit_ide =
-                      static_pointer_cast<sd_packing_texture_unit_ide>(
-                          ptxt_unit);
-                  img_sz = {(float)(*ptxt_unit_ide)->_width,
-                            (float)(*ptxt_unit_ide)->_height};
-                  ImGui::Text("Texture:%s", (*ptxt_unit_ide)->name.c_str());
-                  auto &pvsub_unit = (*ptxt_unit_ide)->vtexture_coordinate;
-                  if (ptxt_idx->y < pvsub_unit.size()) {
-                    auto &psub_unit = pvsub_unit[ptxt_idx->y];
-                    auto psub_unit_ide =
-                        static_pointer_cast<sd_sub_texture_coordinate_ide>(
-                            psub_unit);
-                    img_sz = {(*psub_unit_ide)->width(),
-                              (*psub_unit_ide)->height()};
-                    ImGui::SameLine();
-                    ImGui::Text("->%s", (*psub_unit_ide)->filename.c_str());
-                  }
-                }
-                vec2 invalid_pos = {-1, 0};
-                vec4 tincol = {1, 1, 1, 1}, bordcol = {0, 0, 0, 0};
-                bool is_fat = img_sz.x > img_sz.y;
-                if (is_fat && img_sz.x > imge_edit_view_width_max) {
-                  auto scale = img_sz.y / img_sz.x;
-                  img_sz.x = imge_edit_view_width_max;
-                  img_sz.y = imge_edit_view_width_max * scale;
-                } else if (!is_fat && img_sz.y > imge_edit_view_height_max) {
-                  auto scale = img_sz.x / img_sz.y;
-                  img_sz.y = imge_edit_view_height_max;
-                  img_sz.x = imge_edit_view_height_max * scale;
-                }
-
-                packing_texture::draw_rect(*ptxt_idx, invalid_pos, img_sz,
-                                           tincol, bordcol);
-              };
-            } else {
-              f_draw_index_prop = [&](string &str_show, void *maddress) {
-                return ImGui::SliderInt2(str_show.c_str(), (int *)maddress,
-                                         _vrange._min._u, _vrange._max._u);
-              };
-            }
-          } else if (mtype == "vi3") {
-            f_draw_index_prop = [&](string &str_show, void *maddress) {
-              return ImGui::SliderInt3(str_show.c_str(), (int *)maddress,
-                                       _vrange._min._i, _vrange._max._i);
-            };
-          } else if (mtype == "vi4") {
-            f_draw_index_prop = [&](string &str_show, void *maddress) {
-              return ImGui::SliderInt4(str_show.c_str(), (int *)maddress,
-                                       _vrange._min._i, _vrange._max._i);
-            };
-          } else if (mtype == "vec2") {
-            f_draw_index_prop = [&](string &str_show, void *maddress) {
-              return ImGui::SliderFloat2(str_show.c_str(), (float *)maddress,
-                                         _vrange._min._f, _vrange._max._f,
-                                         float_format.c_str());
-            };
-          } else if (mtype == "vec3") {
-            f_draw_index_prop = [&](string &str_show, void *maddress) {
-              if (rg == "clr") {
-                return ImGui::ColorEdit3(str_show.c_str(), (float *)maddress,
-                                         ImGuiColorEditFlags_RGB);
-              } else {
-                return ImGui::SliderFloat3(str_show.c_str(), (float *)maddress,
-                                           _vrange._min._f, _vrange._max._f,
-                                           float_format.c_str());
-              }
-            };
-          } else if (mtype == "vec4") {
-            f_draw_index_prop = [&](string &str_show, void *maddress) {
-              if (rg == "clr") {
-                return ImGui::ColorEdit4(str_show.c_str(), (float *)maddress,
-                                         ImGuiColorEditFlags_RGB);
-              } else {
-                return ImGui::SliderFloat4(str_show.c_str(), (float *)maddress,
-                                           _vrange._min._f, _vrange._max._f,
-                                           float_format.c_str());
-              }
-            };
-          } else if (mtype == "bool") {
-            f_draw_index_prop = [&](string &str_show, void *maddress) {
-              return ImGui::Checkbox(str_show.c_str(), (bool *)maddress);
-            };
-          } else {
-            printf("unknown member type!:%s\n", mtype.c_str());
+          if (!edit_file_ele(*memb)) {
             continue;
-          }
-          if (f_draw_index_prop) {
-            if (array_cnt > 0) {
-              for (int ix = 0; ix < array_cnt; ++ix) {
-                char str_index[50] = {0};
-                sprintf(str_index, "[%d]", ix);
-                string mname_width_index = mname + str_index;
-                void *memb_index_address = (char *)memb_address + ix * mtpsz;
-                f_draw_index_prop(mname_width_index, memb_index_address);
-              }
-            } else {
-              f_draw_index_prop(mname, memb_address);
-            }
           }
         }
       }
       ImGui::SameLine();
       ImGui::PushID(idx);
       if (IconButton("ailias") && ImGui::IsMouseDoubleClicked(0)) {
-          //TODO: open create alias window
+        // TODO: open create alias window
       }
       if (IconButton("drag")) {
-          //TODO:dragging_value_to_tar::reg_a_value();
+        // TODO:dragging_value_to_tar::reg_a_value();
       }
       dragging_value_to_tar::try_dragging();
       ImGui::PopID();
@@ -352,8 +328,8 @@ void control_def_ide::draw_outline() {
   string cur_cname = typeid(*this).name();
   cur_cname = cur_cname.substr(sizeof("class autofuture::"));
   ImVec2 asz = to_imvec2(size());
-  
-  pos[0] = winpos + ImVec2(abpos.x,abpos.y);
+
+  pos[0] = winpos + ImVec2(abpos.x, abpos.y);
   pos[1] = pos[0] + ImVec2(asz.x, 0.f);
   pos[2] = pos[0] + asz;
   pos[3] = pos[0] + ImVec2(0.f, asz.y);
@@ -376,27 +352,27 @@ void control_def_ide::draw_outline() {
 }
 void control_def_ide::draw_sel_anchor() {}
 void control_def_ide::draw_corners() {
-    ImU32 col = ImGui::GetColorU32(ImGuiCol_HeaderActive);
-    auto abpos = absolute_coordinate_of_base_pos();
-    ImVec2 winpos = ImGui::GetWindowPos();
-    ImVec2 pos1 = winpos + ImVec2(abpos.x, abpos.y);
-    ImVec2 pos2 =  { pos1.x,pos1.y+size().y };
-    ImVec2 pos3 = { pos1.x + size().x,pos1.y + size().y };
-    ImVec2 pos4=  { pos1.x + size().x,pos1.y };
-        
-    ImVec2 editunit(edit_unit_len, edit_unit_len);
-    ImVec2 pos1a = pos1 - editunit;
-    ImVec2 pos1b = pos1 + editunit;
-    ImGui::RenderFrame(pos1a, pos1b, col);
-    ImVec2 pos2a = pos2 - editunit;
-    ImVec2 pos2b = pos2 + editunit;
-    ImGui::RenderFrame(pos2a, pos2b, col);
-    ImVec2 pos3a = pos3 - editunit;
-    ImVec2 pos3b = pos3 + editunit;
-    ImGui::RenderFrame(pos3a, pos3b, col);
-    ImVec2 pos4a = pos4 - editunit;
-    ImVec2 pos4b = pos4 + editunit;
-    ImGui::RenderFrame(pos4a, pos4b, col);
+  ImU32 col = ImGui::GetColorU32(ImGuiCol_HeaderActive);
+  auto abpos = absolute_coordinate_of_base_pos();
+  ImVec2 winpos = ImGui::GetWindowPos();
+  ImVec2 pos1 = winpos + ImVec2(abpos.x, abpos.y);
+  ImVec2 pos2 = {pos1.x, pos1.y + size().y};
+  ImVec2 pos3 = {pos1.x + size().x, pos1.y + size().y};
+  ImVec2 pos4 = {pos1.x + size().x, pos1.y};
+
+  ImVec2 editunit(edit_unit_len, edit_unit_len);
+  ImVec2 pos1a = pos1 - editunit;
+  ImVec2 pos1b = pos1 + editunit;
+  ImGui::RenderFrame(pos1a, pos1b, col);
+  ImVec2 pos2a = pos2 - editunit;
+  ImVec2 pos2b = pos2 + editunit;
+  ImGui::RenderFrame(pos2a, pos2b, col);
+  ImVec2 pos3a = pos3 - editunit;
+  ImVec2 pos3b = pos3 + editunit;
+  ImGui::RenderFrame(pos3a, pos3b, col);
+  ImVec2 pos4a = pos4 - editunit;
+  ImVec2 pos4b = pos4 + editunit;
+  ImGui::RenderFrame(pos4a, pos4b, col);
 }
 using json = nlohmann::json;
 

@@ -21,8 +21,8 @@ void material_3d::ex_init_fun() {
     } else {
       ImGui::InputText("Primitive object:", _pt._vertex_name, FILE_NAME_LEN);
       if (ImGui::Button("Link##prm")) {
-        auto &iprm = g_vertex_list.find(_pt._vertex_name);
-        if (iprm != g_vertex_list.end()) {
+        auto &iprm = _mp_vertex_base_units.find(_pt._vertex_name);
+        if (iprm != _mp_vertex_base_units.end()) {
           // sscanf()
 
           _ps_prm = iprm->second;
@@ -51,7 +51,7 @@ void material_3d::ex_init_fun() {
         } else {
           string str_prm_nm(_pt._vertex_name);
           if (ref_a_intenal_vertex(str_prm_nm)) {
-            _ps_prm = g_vertex_list[str_prm_nm];
+            _ps_prm = _mp_vertex_base_units[str_prm_nm];
           }
         }
       }

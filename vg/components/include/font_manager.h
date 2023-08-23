@@ -3,8 +3,15 @@
 namespace vg {
 using ps_font_unit = std::shared_ptr<font_unit>;
 using dic_fonts = std::vector<ps_font_unit>;
+enum omit_type{
+en_no_omit,
+en_omit_rest,
+en_omit_rest_with_ellipsis,
+en_omit_type_number
+};
 namespace font_manager {
-dic_fonts _dic_fonts;
+
+dic_fonts& get_dic_fonts();
 bool load_font(font_unit& ft, uint8_t *pfont_buff,
                        FT_Long file_size);
 

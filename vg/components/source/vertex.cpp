@@ -43,6 +43,9 @@ void vertex_unit::load_vertex_data(u32 mem_usage, float *pvertex_data,
     glGenVertexArrays(1, &_vao);
   }
   _format = fmt;
+  _vertex_buf_len = vertex_bytes_nm;
+  _mem_usage = mem_usage;
+  _ele_buf_len = ele_cnt;
   GLubyte stride_ = stride();
   auto vertex_cnt=vertex_bytes_nm/sizeof(float)*stride_;
   calcu_boundingbox(pvertex_data, vertex_cnt);
@@ -50,7 +53,7 @@ void vertex_unit::load_vertex_data(u32 mem_usage, float *pvertex_data,
   glBindVertexArray(_vao);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   
-  glBufferData(GL_ARRAY_BUFFER, vertex_bytes_nm, pvertex_data, mem_usage);
+  glBufferData(GL_ARRAY_BUFFER, vertex_bytes_nm*sizeof(GLfloat), pvertex_data, mem_usage);
 
   if (pele_buff) {
     if (!_ebo) {

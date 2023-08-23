@@ -1,6 +1,6 @@
 #include "slider_path_picker.h"
 #include "common_functions.h"
-#include "res_output.h"
+#include "packing_texture_container.h"
 #include <GLFW/glfw3.h>
 #include <sstream>
 static inline ImVec2 operator+(const ImVec2 &lhs, const ImVec2 &rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }

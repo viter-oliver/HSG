@@ -13,6 +13,7 @@ struct bounding_box
 	float _ymin{ 0.f }, _ymax{ 0.f };
 	float _zmin{ 0.f }, _zmax{ 0.f };
 };
+using pg_sd_txt=packing_texture::sd_packing_texturedef;
 struct mesh
 {
 	std::vector<std::string> _text_diffuse_list;
@@ -20,11 +21,11 @@ struct mesh
 	std::vector<std::string> _text_height_list;
 	std::vector<std::string> _text_ambient_list;
 	std::string _prm_id;
-	std::vector<sd_packing_texturedef> _ps_text_diffuse_list;
-	std::vector<sd_packing_texturedef> _ps_text_specular_list;
-	std::vector<sd_packing_texturedef> _ps_text_height_list;
-	std::vector<sd_packing_texturedef> _ps_text_ambient_list;
-	sd_primitivbe_base _ps_prm_id;
+	std::vector<pg_sd_txt> _ps_text_diffuse_list;
+	std::vector<pg_sd_txt> _ps_text_specular_list;
+	std::vector<pg_sd_txt> _ps_text_height_list;
+	std::vector<pg_sd_txt> _ps_text_ambient_list;
+	vertex::sd_vertex_def _ps_prm_id;
 	bounding_box _box;
 };
 extern const char* assimp_support_format;

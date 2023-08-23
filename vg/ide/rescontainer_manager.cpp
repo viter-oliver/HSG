@@ -1,5 +1,5 @@
 #include "rescontainer_manager.h"
-#include "res_output.h"
+#include "packing_texture_container.h"
 #include "vg_state_manager.h"
 
 

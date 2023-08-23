@@ -17,5 +17,5 @@ struct file_chunk_unit {
   void re_alloc(u32 fsize);
   ~file_chunk_unit();
 };
-using sd_file_chunk_unit = std::shared_ptr<file_chunk_unit>;
+
 } // namespace vg

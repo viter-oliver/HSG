@@ -23,13 +23,16 @@ public:
   void draw();
   void set_content(const char *strct) { strcpy(_txt_pt._content, strct); }
   const char *content() { return _txt_pt._content; }
-  area_f &get_cover_area() { return _txt_area; }
+  
   void set_txt_clr(float r, float g, float b) {
     _txt_pt._txt_clr.x = r;
     _txt_pt._txt_clr.y = g;
     _txt_pt._txt_clr.z = b;
   }
-  bool contain(vec2 &tar_pos);
+  bool contain(vec2& tar_pos) {
+      return _txt_area.contain(tar_pos);
+  }
+  DECLARE_EX_INT
 };
 REG_CTL_2_FAC(textblock);
 } // namespace vg

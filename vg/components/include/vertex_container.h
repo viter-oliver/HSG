@@ -1,13 +1,14 @@
 #ifdef WITHIN_IDE
 #include "vertex_ide.h"
-using sd_vertex_base=vg::vertex::sd_vertex_ide;
+using vertex_def=vg::vertex::vertex_ide;
 #else
 #include "vertex.h"
-using sd_vertex_base=vg::vertex::sd_vertex_unit;
+using vertex_def=vg::vertex::vertex_unit;
 #endif
 namespace vg{
   namespace vertex{
-    using mp_vertex_base=std::map<std::string,sd_vertex_base>;
+    using sd_vertex_def=std::shared_ptr<vertex_def>;
+    using mp_vertex_base=std::map<std::string,sd_vertex_def>;
     extern mp_vertex_base _mp_vertex_base_units;
   }
 }

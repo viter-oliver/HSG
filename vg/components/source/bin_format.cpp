@@ -6,7 +6,7 @@ extern "C" {
 }
 namespace vg {
 namespace bin_format {
-#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
 #endif
 output_bin_format _bin_format;
