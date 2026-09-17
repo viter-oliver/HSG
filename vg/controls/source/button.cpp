@@ -1,5 +1,4 @@
-#include "button.h"
-#include "packing_texture_draw.h"
+#include "button.hpp"
 namespace vg
 {
 	button::button()
@@ -11,7 +10,7 @@ namespace vg
 		auto& tintClr=_pt._tint_clr;
         auto& bdClr=_pt._border_clr;
 		vec2 draw_pos=absolute_coordinate_of_base_pos();
-		packing_texture::draw_rect(get_cur_txt_id(),draw_pos,size(),tintClr,bdClr);
+	
 	}
 
 

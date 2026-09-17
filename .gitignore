@@ -1,0 +1,13 @@
+*.AFB
+*.ini
+*.pdb
+*.exe
+*.zip
+.vscode/settings.json
+.VSCodeCounter*
+boost_1_79_0*
+build*
+running*
+vg/.vscode*
+vg/hsg.code-workspace
+vg/playground/hsg.code-workspace

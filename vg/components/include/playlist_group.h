@@ -15,6 +15,5 @@ using playlist_unit_list = std::vector<playlist_unit>;
 using sp_playlist_group_unit = std::shared_ptr<playlist_unit_list>;
 using playlist_group_list = std::map<std::string, sp_playlist_group_unit>;
 
-extern playlist_group_list g_playlist_group_list;
 extern bool AFG_EXPORT play_playlist_group(std::string gp_name);
 }

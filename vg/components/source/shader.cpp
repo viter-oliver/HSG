@@ -1,9 +1,5 @@
 #include "shader.h"
 namespace vg {
-GLuint draw_model[en_gl_count] = {
-    GL_POINTS,    GL_LINES,          GL_LINE_LOOP,    GL_LINE_STRIP,
-    GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN,
-};
 namespace shader {
 using namespace std;
 struct vtype_size {
@@ -147,7 +143,6 @@ bool shader_base::build_fs_code(const char *fragment_code) {
 }
 bool shader_base::link() {
   if (!_valid_vs || !_valid_fs) {
-    _valid = false;
     return false;
   }
   if (_program_id == 0) {
@@ -158,18 +153,20 @@ bool shader_base::link() {
   glAttachShader(_program_id, _fragment_shader);
   glLinkProgram(_program_id);
   GLint status;
-  glGetShaderiv(_program_id, GL_LINK_STATUS, &status);
+  glGetProgramiv(_program_id, GL_LINK_STATUS, &status);
   if (status != GL_TRUE) {
-    _valid = false;
+    _valid_pm = false;
+    glGetProgramInfoLog(_program_id, compile_buff_len, NULL, compile_buff);
+    printf("shader linker error:%s\n", compile_buff);
     return false;
   }
-  _valid = true;
+  _valid_pm = true;
   refresh_viarable_list();
   return true;
 }
 void shader_base::use() { glUseProgram(_program_id); }
 bool shader_base::match_format(std::vector<u8> &vertec_fmt) {
-  if (!_valid || vertec_fmt.size() != _att_list.size()) {
+  if (!valid() || vertec_fmt.size() != _att_list.size()) {
     return false;
   }
   for (u8 ix = 0; ix < vertec_fmt.size(); ++ix) {
@@ -181,10 +178,117 @@ bool shader_base::match_format(std::vector<u8> &vertec_fmt) {
   }
   return true;
 }
-void shader_base::spawn_mp_sd_shader_variable(mp_sd_shader_variable &target) {
-  for (const auto &unf_u : _unf_list) {
-    target[unf_u.first] = unf_u.second->spawn_variable();
-  }
+
+GLuint shader_base::type2target(ShaderTargetType target_type)
+{
+    switch (target_type)
+    {
+        case ShaderTargetType::VERTEX_SHADER: { return  _vertex_shader; break; }
+        case ShaderTargetType::FRAGMENT_SHADER: { return   _fragment_shader; break; }
+        case ShaderTargetType::PROGRAM: { return  _program_id; break; }
+        default:
+            return 0;
+    }
 }
+bool shader_base::compile(ShaderTargetType target_type, std::string& error_info)
+{
+    GLuint target = type2target(target_type);
+    if (target == 0)return 0;
+    glCompileShader(target);
+
+    bool ret = check_shader_error(target_type, ShaderCheckType::COMPILE, error_info);
+    bool cur_valid = true;
+    if (ret == false)
+    {
+        cur_valid = false;
+        printf("shader error:%s\n", error_info.c_str());
+    }
+    if (target_type == ShaderTargetType::VERTEX_SHADER)
+        _valid_vs = cur_valid;
+    else
+        _valid_fs = cur_valid;
+    return cur_valid;
+}
+bool shader_base::link(std::string& error_info) {
+    if (!_valid_vs || !_valid_fs) {
+        return false;
+    }
+    if (_program_id == 0) {
+        _program_id = glCreateProgram();
+    }
+
+    glAttachShader(_program_id, _vertex_shader);
+    glAttachShader(_program_id, _fragment_shader);
+    glLinkProgram(_program_id);
+    bool ret = check_shader_error(ShaderTargetType::PROGRAM, ShaderCheckType::LINK, error_info);
+    if (ret == GL_FALSE) {
+        _valid_pm = false;
+        return false;
+    }
+    _valid_pm = true;
+    refresh_viarable_list();
+    return true;
+}
+void shader_base::set_source(ShaderTargetType target_type, const std::string& source)
+{
+    const char* cur_vs_code = source.c_str();
+    if (target_type == ShaderTargetType::VERTEX_SHADER)
+    {
+        if (_vertex_shader == 0)
+            _vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(_vertex_shader, 1, &cur_vs_code, 0);
+    }
+    else if (target_type == ShaderTargetType::FRAGMENT_SHADER)
+    {
+        if (_fragment_shader == 0)
+            _fragment_shader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(_fragment_shader, 1, &cur_vs_code, 0);
+    }
+
+}
+bool shader_base::get_source(ShaderTargetType target_type, std::string& source)
+{
+    GLint cur_source_length = 0;
+    u32 target = type2target(target_type);
+
+    glGetShaderiv(target, GL_SHADER_SOURCE_LENGTH, &cur_source_length);
+    if (cur_source_length > 0) {
+        source.resize(cur_source_length);
+        glGetShaderSource(target, cur_source_length, nullptr, &source[0]);
+    }
+    return cur_source_length;
+}
+bool shader_base::check_shader_error(ShaderTargetType target_type, ShaderCheckType type, std::string& error_info)
+{
+    GLint success = 0;
+    constexpr int LOG_SIZE = 1024;
+    char info_log[LOG_SIZE]{};
+    GLuint target = type2target(target_type);
+
+    if (type == COMPILE)
+    {
+        glGetShaderiv(target, GL_COMPILE_STATUS, &success);
+        if (!success)
+        {
+            glGetShaderInfoLog(target, LOG_SIZE, NULL, info_log);
+            error_info = std::string(info_log);
+            return 0;
+        }
+    }
+    else if (type == LINK)
+    {
+        glGetProgramiv(target, GL_LINK_STATUS, &success);
+        if (!success)
+        {
+            glGetProgramInfoLog(target, 1024, NULL, info_log);
+            error_info = std::string(info_log);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+
 } // namespace shader
 } // namespace vg

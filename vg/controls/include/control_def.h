@@ -1,94 +1,94 @@
 #pragma once
-#include "platform_def.h "
-#include "property_utilities.h"
-#include "vg_type.h"
 #include <assert.h>
 #include <functional>
 #include <stdexcept>
+#include <algorithm>
+#include "platform_def.h "
+#include "macro_tool.h"
+#include "vg_type.h"
+#include "property_utilities.h"
+#include "def_member.h"
 
 namespace vg {
-struct property_mem_range {
-  void *phead_adree;
-  int mem_len;
-  property_mem_range(void *phead, int len) : phead_adree(phead), mem_len(len) {}
-};
-using v_property_mem_range = std::vector<property_mem_range>;
-const int name_len = 50;
+
+
 class control_def;
-using sd_control_def = std::shared_ptr<control_def>;
-using v_sd_control_def = std::vector<sd_control_def>;
-class AFG_EXPORT control_def {
+DEFINE_SMART(control_def)
+using draw_handler=std::function<void(void)>;
+class AFG_EXPORT control_def ADD_GET_MEMBER_MTHOND {
 protected:
-  vp_prop_ele _vprop_eles;
-  DEF_STRUCT_WITH_INIT(base_prop, _in_p, 
-  (vec2, _pos, {0.f}),
-  (vec2, _size, {20.f}), 
-  (bool, _visible, {true}),
-  (char, _name[name_len]))
+  //vp_prop_ele _vprop_eles;
+  v_mem_page _mem_page;//
+  DEFINE_MEMBER_CONTAINER
+
+  DEF_STRUCT_WITH_INIT(_in_p, 
+  (vec2, _pos),
+  (vec2, _size), 
+  (bool, _visible, {true}), 
+  (char_50, _name, {"root"}))
   v_sd_control_def _vchilds;
   /** the parent object, this member will NULL if current object is root */
   control_def *_parent = nullptr;
-
+  draw_handler _before_draw_handle = nullptr;
+  draw_handler _after_draw_handle = nullptr;
+  draw_handler _draw_focus_handle = nullptr;
+  inline static vec2 base_offset = {0, 0};
 public:
-  static prop_ele null_prop_ele;
-  static field_ele null_field_ele;
-  // static field_ele_with_value null_field_ele_with_value;
-  prop_ele &get_prop_ele(int pgidx) {
-    auto vpsz = _vprop_eles.size();
-    if (pgidx >= vpsz) {
-      return null_prop_ele;
-    }
-    return *_vprop_eles[pgidx];
+  static void set_base_offset( float x, float y )
+  { base_offset = {x, y};
   }
-  field_ele &get_filed_ele(int pgidx, int field_idx) {
-    auto &pele = get_prop_ele(pgidx);
-    auto vfsz = pele._pro_page.size();
-    if (field_idx >= vfsz) {
-      return null_field_ele;
-    }
-    auto &vfiled = pele._pro_page;
-    return *vfiled[field_idx];
+  DEFINE_GET_MEMBER
+  //virtual void ex_init_fun() = 0;
+  control_def() { 
+    //_in_p._name.get_str_value( "root");
+    _in_p._pos = {0, 0};
+    _in_p._size = {100, 100};
+   // ex_init_fun(); 
   }
-  virtual void ex_init_fun() {}
-  control_def() { ex_init_fun(); }
-
+  void register_before_draw_handle( draw_handler draw_hdl ) {
+    std::swap(_before_draw_handle, draw_hdl);
+  }
+  void register_after_draw_handle(draw_handler draw_hdl) {
+    std::swap(_after_draw_handle, draw_hdl);
+  }
 #define DECLARE_EX_INT
-#define DECLARE_PROVIDE_DRAGGING_VALUE
 #define DECLARE_DRAW_OUTLINE
 #define DECLARE_DRAW_SEL_ANCHOR
+#define DECLARE_DRAW_PROPERTY
 
   virtual ~control_def() {}
-  void collect_property_range(v_property_mem_range &vplist) {
-    for (auto &prop_ele : _vprop_eles) {
-      vplist.emplace_back(prop_ele->_pro_address, prop_ele->_pro_sz);
-    }
+  virtual void link() {}
+  v_mem_page& get_mem_page() {
+    return _mem_page;
   }
-  /*control_def *get_copy_of_object(){
-
-  }*/
-  std::function<void(void)> _before_draw_handle = nullptr;
-  std::function<void(void)> _after_draw_handle = nullptr;
-  void draw_frames() {
+  virtual void draw_frames() {
     if (!visibility()) {
       return;
     }
     if (_before_draw_handle) {
       _before_draw_handle();
     }
+    draw();
     for (auto &pchild : _vchilds) {
       if (pchild->visibility()) {
-        pchild->draw();
+        pchild->draw_frames();
       }
     }
     if (_after_draw_handle) {
       _after_draw_handle();
     }
   }
+  void draw_focus() {
+    if (_draw_focus_handle)
+      _draw_focus_handle();
+  }
   virtual void draw() {}
-  virtual void draw_outline() {}
   vec2 &base_pos() { return _in_p._pos; }
   vec2 &size() { return _in_p._size; }
-  bool &visibility() { return _in_p._visible; }
+
+  //virtual void shift( vec2 offset ) { _in_p._pos += offset;}
+
+  bool visibility() { return _in_p._visible; }
   auto get_parent() { return _parent; }
   bool be_seen() {
     control_def *pparnt = this;
@@ -99,7 +99,10 @@ public:
     } while (pparnt = pparnt->get_parent());
     return true;
   }
-  char *name() { return _in_p._name; }
+  char *name() { return _in_p._name.value; }
+  void set_name(std::string& name){
+    _in_p._name.get_str_value(name);
+  }
   void add_child(sd_control_def pchild) {
     pchild->_parent = this;
     _vchilds.emplace_back(pchild);
@@ -115,10 +118,16 @@ public:
     }
     _vchilds.emplace(_vchilds.begin() + index, pchild);
   }
+  void iterate_child( std::function<void( sd_control_def& sd_child )> iterator )
+  {
+    for (auto &sd_child : _vchilds) {
+      iterator(sd_child);
+    }
+  }
   void clear_rebundent_memory() {
-    _vprop_eles.shrink_to_fit();
     _vchilds.shrink_to_fit();
   }
+  
   virtual void remove_child(sd_control_def pchild) {
     auto it = find(_vchilds.begin(), _vchilds.end(), pchild);
     if (it != _vchilds.end()) {
@@ -165,11 +174,18 @@ public:
     }
     return base_pos_;
   }
+  vec2 get_draw_pos()
+  { auto abpos = absolute_coordinate_of_base_pos();
+    auto draw_pos = abpos + base_offset;
+    return draw_pos;
+  }
   virtual bool contain(vec2 &tar_pos) {
-    vec2 right_bottom = base_pos() + size();
-    area_f control_area = {base_pos(), right_bottom};
+    auto apos = absolute_coordinate_of_base_pos();
+    vec2 right_bottom = apos+ size();
+    area_f control_area = {apos, right_bottom};
     return control_area.contain(tar_pos);
   }
+  /** FIXME
   sd_control_def get_hit_obj(vec2 &tar_pos) {
     for (auto it = _vchilds.rbegin(); it != _vchilds.rend(); it++) {
       if ((*it)->visibility()) {
@@ -186,34 +202,16 @@ public:
       return nullptr;
     }
   }
+  */
   bool set_prop_fd_value(int pg_id, int fd_id, void *pvalue,
                          u32 value_sz = -1) {
     if (!pvalue) {
       vg_print("pvalue is 0");
       return false;
     }
-    auto pg_sz = _vprop_eles.size();
-
-    if (pg_id >= pg_sz) {
-      vg_print("page id:% is ivalid", pg_id);
-      return false;
-    }
-
-    auto &pg_ele = _vprop_eles[pg_id];
-    auto &vfd_ele = pg_ele->_pro_page;
-    auto vfd_ele_sz = vfd_ele.size();
-    assert(fd_id < vfd_ele_sz && "invalid fd_id");
-    if (fd_id >= vfd_ele_sz) {
-      vg_print("field id:%d is invalid", fd_id);
-      return false;
-    }
-    auto &fd_ele = *vfd_ele[fd_id];
-    char *pdest = fd_ele._address;
-    auto wsize = fd_ele._count * fd_ele._tpsz;
-    auto cp_sz = value_sz > wsize ? wsize : value_sz;
-
-    memcpy(pdest, pvalue, cp_sz);
+    
     return true;
   }
 };
+
 } // namespace vg

@@ -1,0 +1,368 @@
+#include "bind_var.h"
+#include "user_control_imgui.h"
+using namespace std;
+namespace vg{
+
+enum range_value_type {
+  en_range_value_int,
+  en_range_value_float,
+  en_range_value_double,
+};
+
+struct value_range {
+  range_value_type _vtype;
+  union {
+    int _i;
+    unsigned int _u;
+    float _f;
+    double _d;
+  } _min;
+  union {
+    int _i;
+    unsigned int _u;
+    float _f;
+    double _d;
+  } _max;
+
+  value_range() : _vtype(en_range_value_int) {}
+  value_range(int imin, int imax) : _vtype(en_range_value_int) {
+    _min._i = imin;
+    _max._i = imax;
+  }
+  value_range(float fmin, float fmax) : _vtype(en_range_value_float) {
+    _min._f = fmin;
+    _max._f = fmax;
+  }
+  value_range(double dmin, double dmax) : _vtype(en_range_value_double) {
+    _min._d = dmin;
+    _max._d = dmax;
+  }
+};
+#define DEF_VG_MEMB(name, min, max) {#name, value_range(min, max)},
+map<string, value_range> value_range_table = {
+    DEF_VG_MEMB(shd,-100,100) 
+    DEF_VG_MEMB(std,-10,10)
+    DEF_VG_MEMB(srd,-360,360) 
+    DEF_VG_MEMB(uhd,0,100) 
+    DEF_VG_MEMB(urd,0,360) 
+    DEF_VG_MEMB(utn,0,10)
+    DEF_VG_MEMB(nml,0.f,1.f)
+    DEF_VG_MEMB(ftn,0.f,10.f)
+    DEF_VG_MEMB(f1s,0.f,1000.f)
+    DEF_VG_MEMB(f2s,0.f,2000.f)
+    DEF_VG_MEMB(hac,0.f,2000.f)
+};
+value_range f32_range(-2000.f, 2000.f);
+value_range f64_range(-20000.f, 20000.f);
+value_range s32_range(-2000, 2000);
+value_range s16_range(-1000, 1000);
+value_range u32_range(0, 4000);
+value_range u16_range(0, 2000);
+value_range u8_range(0, 255);
+
+  string get_rg( string& var_name )
+  {
+    return var_name.substr(var_name.length() - 3, 3);
+  }
+  string get_show_name( string& var_name )
+  {
+    return var_name.substr(0, var_name.length() - 4);
+  }
+  void bind_var_t<s32>::edit(){
+    string rg = get_rg(_var_name);
+    auto itb = value_range_table.find(rg);
+    if (itb != value_range_table.end()) {
+      auto& range=itb->second;
+      string vname = get_show_name(_var_name);
+      ImGui::SliderInt(vname.c_str(), &_value, range._min._i, range._max._i);
+    } else {
+      ImGui::SliderInt(_var_name.c_str(), &_value, s32_range._min._i,
+                       s32_range._max._i);
+    }
+  }
+  void bind_var_t<s16>::edit() {
+    ImGui::SliderScalar(_var_name.c_str(), ImGuiDataType_S16,& _value,
+                        &s16_range._min._i,
+                     &s16_range._max._i);
+  }
+  void bind_var_t<u16>::edit() {
+    ImGui::SliderScalar(_var_name.c_str(), ImGuiDataType_U16, &_value,
+                        &u16_range._min._i, &u16_range._max._i);
+  }
+  void bind_var_t<u8>::edit() {
+    ImGui::SliderScalar(_var_name.c_str(), ImGuiDataType_U8, &_value,
+                        &u8_range._min._i, &u8_range._max._i);
+  }
+  void bind_var_t<float>::edit(){
+    
+    string rg = get_rg(_var_name);
+    auto itb = value_range_table.find(rg);
+    if (itb != value_range_table.end()) {
+      auto& range=itb->second;
+      string fmt = "%.3f";
+      if (rg == "hac") {
+        fmt = "%.6f";
+      }
+      string vname = get_show_name(_var_name);
+      ImGui::SliderFloat(vname.c_str(), &_value, range._min._f, range._max._f,fmt.c_str());
+    } else {
+      ImGui::SliderFloat(_var_name.c_str(), &_value, f32_range._min._f,
+                         f32_range._max._f, "%.3f");
+    }    
+  }
+
+  void bind_var_t<bool>::edit(){
+    ImGui::Checkbox(_var_name.c_str(),&_value);
+  }  
+
+  void bind_var_t<vi2>::edit(){
+    string rg = get_rg(_var_name);
+    auto itb = value_range_table.find(rg);
+    if (itb != value_range_table.end()) {
+      auto &range = itb->second;
+      string vname = get_show_name(_var_name);
+      ImGui::SliderInt2(vname.c_str(), (int*) & _value, range._min._i,
+                       range._max._i);
+    } else {
+      ImGui::SliderInt2(_var_name.c_str(), (int *)&_value, s32_range._min._i,
+                        s32_range._max._i);
+    }
+  }
+  void bind_var_t<vui2>::edit() {
+    string rg = get_rg(_var_name);
+    auto itb = value_range_table.find(rg);
+    if (itb != value_range_table.end()) {
+      auto &range = itb->second;
+      string vname = get_show_name(_var_name);
+      ImGui::SliderInt2(vname.c_str(), (int *)&_value, range._min._i,
+                        range._max._i);
+    } else {
+      ImGui::SliderInt2(_var_name.c_str(), (int *)&_value, s32_range._min._i,
+                        s32_range._max._i);
+    }
+  }
+  void bind_var_t<vi3>::edit(){
+    string rg = get_rg(_var_name);
+    auto itb = value_range_table.find(rg);
+    if (itb != value_range_table.end()) {
+      auto &range = itb->second;
+      string vname = get_show_name(_var_name);
+      ImGui::SliderInt3(vname.c_str(), (int *)&_value, range._min._i,
+                        range._max._i);
+    } else {
+      ImGui::SliderInt3(_var_name.c_str(), (int *)&_value, s32_range._min._i,
+                        s32_range._max._i);
+    }
+  }
+  void bind_var_t<vi4>::edit(){
+    string rg = get_rg(_var_name);
+    auto itb = value_range_table.find(rg);
+    if (itb != value_range_table.end()) {
+      auto &range = itb->second;
+      string vname = get_show_name(_var_name);
+      ImGui::SliderInt4(vname.c_str(), (int *)&_value, range._min._i,
+                        range._max._i);
+    } else {
+      ImGui::SliderInt4(_var_name.c_str(), (int *)&_value, s32_range._min._i,
+                        s32_range._max._i);
+    }
+  }
+
+  void bind_var_t<vec2>::edit(){
+    string rg = get_rg(_var_name);
+    auto itb = value_range_table.find(rg);
+    if (itb != value_range_table.end()) {
+      auto &range = itb->second;
+      string fmt = "%.3f";
+      if (rg == "hac") {
+        fmt = "%.6f";
+      }
+      string vname = get_show_name(_var_name);
+      ImGui::SliderFloat2(vname.c_str(), (float*) & _value, range._min._f,
+                         range._max._f, fmt.c_str());
+    } else {
+      ImGui::SliderFloat2(_var_name.c_str(), (float *)&_value, f32_range._min._f, f32_range._max._f,
+                          "%.3f");
+     
+    }    
+  }
+
+  void bind_var_t<vec3>::edit(){
+    string rg = get_rg(_var_name);
+    if (rg == "clr") {
+      string vname = get_show_name(_var_name);
+      ImGui::ColorEdit3(vname.c_str(), (float *)&_value);
+    } else {
+      string fmt = "%.3f";
+      string vname =_var_name;
+      value_range range = f32_range;
+      auto itb = value_range_table.find(rg);
+      if (itb != value_range_table.end()) {
+        range = itb->second;
+        if (rg == "hac") {
+          fmt = "%.6f";
+        }
+        vname = get_show_name(_var_name);
+      } 
+      ImGui::SliderFloat3(vname.c_str(), (float *)&_value, range._min._f,
+                          range._max._f, fmt.c_str());
+    }
+  }
+
+  void bind_var_t<vec4>::edit(){
+    string rg = get_rg(_var_name);
+    if (rg == "clr") {
+      string vname = get_show_name(_var_name);
+      ImGui::ColorEdit4(vname.c_str(), (float *)&_value);
+    } else {
+      string fmt = "%.3f";
+      string vname = _var_name;
+      value_range range = f32_range;
+      auto itb = value_range_table.find(rg);
+      if (itb != value_range_table.end()) {
+        range = itb->second;
+        if (rg == "hac") {
+          fmt = "%.6f";
+        }
+        vname = get_show_name(_var_name);
+      }
+      ImGui::SliderFloat4(vname.c_str(), (float *)&_value, range._min._f,
+                          range._max._f, fmt.c_str());
+    }
+  }
+  void bind_var_t<base_key>::edit(){
+      ImGui::InputText(_var_name.c_str(), _value.value, FILE_NAME_LEN);
+  }
+#if 0
+  void bind_var_t<f32_2>::edit()
+  {
+      string rg = get_rg(_var_name);
+      auto itb = value_range_table.find(rg);
+      if (itb != value_range_table.end()) {
+      auto &range = itb->second;
+      string fmt = "%.3f";
+      if (rg == "hac") {
+        fmt = "%.6f";
+      }
+      string vname = get_show_name(_var_name);
+      ImGui::SliderFloat2(vname.c_str(), _value.value, range._min._f,
+                          range._max._f, fmt.c_str());
+      } else {
+      ImGui::SliderFloat2(_var_name.c_str(), _value.value,
+                          f32_range._min._f, f32_range._max._f, "%.3f");
+      }  
+  }
+  void bind_var_t<f32_3>::edit() {
+      string rg = get_rg(_var_name);
+      if (rg == "clr") {
+        string vname = get_show_name(_var_name);
+        ImGui::ColorEdit3(vname.c_str(), _value.value);
+        return;
+      }
+      auto itb = value_range_table.find(rg);
+      if (itb != value_range_table.end()) {
+        auto &range = itb->second;
+        string fmt = "%.3f";
+        if (rg == "hac") {
+          fmt = "%.6f";
+        }
+        string vname = get_show_name(_var_name);
+        ImGui::SliderFloat3(vname.c_str(), _value.value, range._min._f,
+                            range._max._f, fmt.c_str());
+      } else {
+        ImGui::SliderFloat3(_var_name.c_str(), _value.value, f32_range._min._f,
+                          f32_range._max._f, "%.3f");
+      }
+  }
+  void bind_var_t<f32_4>::edit() {
+      string rg = get_rg(_var_name);
+      if (rg == "clr") {
+        string vname = get_show_name(_var_name);
+        ImGui::ColorEdit4(vname.c_str(), _value.value);
+        return;
+      }
+      auto itb = value_range_table.find(rg);
+      if (itb != value_range_table.end()) {
+        auto &range = itb->second;
+        string fmt = "%.3f";
+        if (rg == "hac") {
+          fmt = "%.6f";
+        }
+        string vname = get_show_name(_var_name);
+        ImGui::SliderFloat4(vname.c_str(), _value.value, range._min._f,
+                            range._max._f, fmt.c_str());
+      } else {
+        ImGui::SliderFloat4(_var_name.c_str(), _value.value,
+                            f32_range._min._f, f32_range._max._f, "%.3f");
+      }
+  }
+#endif
+  void bind_var_t<f32_16>::edit() {
+      string rg = get_rg(_var_name);
+      
+      auto itb = value_range_table.find(rg);
+      if (itb != value_range_table.end()) {
+        auto &range = itb->second;
+        string fmt = "%.3f";
+        if (rg == "hac") {
+          fmt = "%.6f";
+        }
+        string vname = get_show_name(_var_name);
+        float *pfdata = _value.value;
+        ImGui::SliderScalarN(vname.c_str(), ImGuiDataType_Float,_value.value,16,
+                             &range._min._f,
+                            &range._max._f, fmt.c_str());
+      } else {
+        ImGui::SliderScalarN(_var_name.c_str(), ImGuiDataType_Float, _value.value,
+                             16,
+                            &f32_range._min._f,
+                            &f32_range._max._f, "%.3f");
+      }
+  }
+  
+  template<typename T>
+  void bind_var_t<T>::edit(){
+      using traits= is_instance_of_vg_array<T>;
+      if constexpr (traits::value) {
+          using InnerT = typename traits::value_type;
+          constexpr int N = traits::size;
+          ImGuiDataType dtype;
+          int range_id=0;
+          int range[][2] =
+          {
+              { -2000, 2000},
+              { -2000, 2000},
+              { 0, 4000},
+              { -20000, 20000}
+          };
+          if constexpr (std::is_same_v<InnerT, f32>) {
+              dtype= ImGuiDataType_Float;
+              range_id = 0;
+          }
+          else if constexpr (std::is_same_v<InnerT, s32>) {
+              dtype= ImGuiDataType_S32;
+              range_id = 1;
+          }
+          else if constexpr (std::is_same_v<InnerT, u32>) {
+              dtype= ImGuiDataType_U32;
+              range_id = 2;
+          }
+          else if constexpr (std::is_same_v<InnerT, f64>) {
+              dtype= ImGuiDataType_Double;
+              range_id = 3;
+          }
+          ImGui::SliderScalarN(_var_name.c_str(), dtype, _value.value,
+                               N,
+                              &range[range_id][0],
+			  &range[range_id][1]);
+      }
+      else {
+          //ImGui::InputFloat(_var_name.c_str(), _value.value);
+      }
+
+  }
+  /*
+  void bind_var_t<texture_key>::edit(){
+      ImGui::InputText(_var_name.c_str(), _value.value, FILE_NAME_LEN);
+  }*/
+}

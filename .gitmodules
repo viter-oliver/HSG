@@ -1,0 +1,12 @@
+[submodule "vg/ide/imgui_extension/ImGuiColorTextEdit"]
+	path = vg/ide/imgui_extension/ImGuiColorTextEdit
+	url = https://github.com/BalazsJako/ImGuiColorTextEdit.git
+[submodule "vg/ide/imgui_extension/cr"]
+	path = vg/ide/imgui_extension/cr
+	url = https://github.com/fungos/cr.git
+[submodule "vg/ide/libigl"]
+	path = vg/ide/libigl
+	url = https://github.com/libigl/libigl.git
+[submodule "vg/ide/libigl-tutorial-data"]
+	path = vg/ide/libigl-tutorial-data
+	url = https://github.com/libigl/libigl-tutorial-data.git
