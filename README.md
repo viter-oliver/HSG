@@ -11,3 +11,4 @@ The coolest feature in HSG is the pipeline function. The pipeline is somewhat li
 ![pipeline2](vg/ide/gifs/pipeline2.gif)
 HSG uses a state machine to drive animations. Each state specifies a set of values for the properties being animated, such as position, rotation, scale, or color. During playback, the engine smoothly interpolates these property values from one state to another, creating continuous motion and visual transitions.
 ![animation](vg/ide/gifs/animation.gif)
+![animation2](vg/ide/gifs/animation2.gif)
